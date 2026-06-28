@@ -38,14 +38,9 @@ export default function Navbar() {
             className="tifinagh-text text-2xl font-bold leading-none"
             style={{ color: 'var(--clay-ink)' }}
           >
-            &#x2D30;&#x2D53;&#x2D4A;&#x2D4D;&#x2D53;
+            &#x2D30;&#x2D59;&#x2D4D;&#x2D4E;&#x2D30;&#x2D37;
           </span>
-          <span
-            className="clay-caption hidden sm:inline"
-            style={{ color: 'var(--clay-muted)' }}
-          >
-            Asklu
-          </span>
+         
         </Link>
 
         {/* Center nav links — desktop only */}

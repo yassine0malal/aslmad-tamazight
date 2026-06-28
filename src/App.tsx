@@ -3,6 +3,7 @@ import { GameProvider } from '@/context/GameContext'
 import { Toaster } from 'sonner'
 import GameLayout from '@/layouts/GameLayout'
 import BareLayout from '@/layouts/BareLayout'
+import ProtectedRoute from '@/components/ProtectedRoute'
 import LandingView from '@/views/LandingView'
 import SetupView from '@/views/SetupView'
 import GameHubView from '@/views/GameHubView'
@@ -40,12 +41,15 @@ export default function App() {
         {/* Game layout — navbar + teacher panel + content area */}
         <Route element={<GameLayout />}>
           <Route path={routes.setup} element={<SetupView />} />
-          <Route path={routes.gameHub} element={<GameHubView />} />
-          <Route path={routes.nextLetter} element={<NextLetterView />} />
-          <Route path={routes.animalMatch} element={<AmudruMatchView />} />
-          <Route path={routes.memory} element={<MemoryMatchView />} />
-          <Route path={routes.riddle} element={<AmsasaRiddleView />} />
-          <Route path={routes.souk} element={<SoukView />} />
+          {/* All routes below require setup to be completed */}
+          <Route element={<ProtectedRoute />}>
+            <Route path={routes.gameHub} element={<GameHubView />} />
+            <Route path={routes.nextLetter} element={<NextLetterView />} />
+            <Route path={routes.animalMatch} element={<AmudruMatchView />} />
+            <Route path={routes.memory} element={<MemoryMatchView />} />
+            <Route path={routes.riddle} element={<AmsasaRiddleView />} />
+            <Route path={routes.souk} element={<SoukView />} />
+          </Route>
         </Route>
 
         {/* Catch-all — redirect to landing */}

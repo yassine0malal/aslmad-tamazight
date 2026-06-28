@@ -11,13 +11,6 @@ export default function MemoryMatchView() {
   const { state, dispatch } = useGame()
   const navigate = useNavigate()
 
-  // Redirect to hub if no active game session
-  useEffect(() => {
-    if (state.teams.length === 0) {
-      navigate(routes.gameHub, { replace: true })
-    }
-  }, [state.teams.length, navigate])
-
   const activeTeam = state.teams[state.activeTeamIndex] || {
     id: 'team-1',
     name: 'الفريق 1',

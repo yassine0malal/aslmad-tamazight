@@ -1,5 +1,5 @@
 import { useGame } from '@/context/GameContext'
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import ParticleBurst from '@/components/ParticleBurst'
 import FloatingScore from '@/components/FloatingScore'
@@ -14,14 +14,6 @@ export default function NextLetterView() {
   const [showFloatingScore, setShowFloatingScore] = useState(false)
   const [shakeCards, setShakeCards] = useState(false)
   const [revealedCard, setRevealedCard] = useState(false)
-  const [cardEnter, setCardEnter] = useState(false)
-
-  // Redirect to hub if no active game session
-  useEffect(() => {
-    if (state.teams.length === 0) {
-      navigate(routes.gameHub, { replace: true })
-    }
-  }, [state.teams.length, navigate])
 
   const puzzle = state.game1Deck[state.currentPuzzleIndex]
   const isLastPuzzle = state.currentPuzzleIndex >= state.game1Deck.length - 1
@@ -31,12 +23,6 @@ export default function NextLetterView() {
     if (totalPuzzles === 0) return 0
     return Math.round((state.currentPuzzleIndex / totalPuzzles) * 100)
   }, [state.currentPuzzleIndex, totalPuzzles])
-
-  useEffect(() => {
-    setCardEnter(false)
-    const timer = setTimeout(() => setCardEnter(true), 100)
-    return () => clearTimeout(timer)
-  }, [state.currentPuzzleIndex])
 
   const handleAnswerClick = useCallback(
     (answer: string) => {
@@ -157,12 +143,7 @@ export default function NextLetterView() {
         {puzzle.sequence.map((letter, idx) => (
           <div
             key={`shown-${idx}`}
-            className="clay-card w-24 h-32 md:w-32 md:h-40 flex flex-col items-center justify-center transition-all duration-500"
-            style={{
-              opacity: cardEnter ? 1 : 0,
-              transform: cardEnter ? 'scale(1)' : 'scale(0.75)',
-              transitionDelay: `${idx * 120}ms`,
-            }}
+            className="clay-card w-24 h-32 md:w-32 md:h-40 flex flex-col items-center justify-center"
           >
             <span
               className="tifinagh-text text-3xl md:text-5xl font-bold"
@@ -177,11 +158,8 @@ export default function NextLetterView() {
 
         <div
           id="question-card"
-          className="clay-card w-24 h-32 md:w-32 md:h-40 flex flex-col items-center justify-center transition-all duration-500"
+          className="clay-card w-24 h-32 md:w-32 md:h-40 flex flex-col items-center justify-center"
           style={{
-            opacity: cardEnter ? 1 : 0,
-            transform: cardEnter ? 'scale(1)' : 'scale(0.75)',
-            transitionDelay: '360ms',
             background: revealedCard ? 'var(--clay-surface-soft)' : undefined,
             border: revealedCard
               ? '2px solid var(--clay-success)'

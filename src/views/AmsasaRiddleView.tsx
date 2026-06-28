@@ -9,13 +9,6 @@ export default function AmsasaRiddleView() {
   const { state, dispatch } = useGame()
   const navigate = useNavigate()
 
-  // Redirect to hub if no active game session
-  useEffect(() => {
-    if (state.teams.length === 0) {
-      navigate(routes.gameHub, { replace: true })
-    }
-  }, [state.teams.length, navigate])
-
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
   const [disabledOptionIds, setDisabledOptionIds] = useState<string[]>([])
   const [timerSeconds, setTimerSeconds] = useState(20)
@@ -24,7 +17,6 @@ export default function AmsasaRiddleView() {
   const [inputLocked, setInputLocked] = useState(false)
   const [passedOnce, setPassedOnce] = useState(false)
   const [announceMessage, setAnnounceMessage] = useState<string | null>(null)
-  const [cardEnter, setCardEnter] = useState(false)
   const passTimeoutRef = useRef<number | null>(null)
 
   const challenge = state.game4Deck[state.currentPuzzleIndex]
@@ -52,13 +44,10 @@ export default function AmsasaRiddleView() {
     setInputLocked(false)
     setPassedOnce(false)
     setAnnounceMessage(null)
-    setCardEnter(false)
     if (passTimeoutRef.current !== null) {
       window.clearTimeout(passTimeoutRef.current)
       passTimeoutRef.current = null
     }
-    const timer = setTimeout(() => setCardEnter(true), 100)
-    return () => clearTimeout(timer)
   }, [state.currentPuzzleIndex, challenge?.id])
 
   useEffect(() => {
@@ -232,11 +221,7 @@ export default function AmsasaRiddleView() {
           {/* Image + Timer */}
           <div>
             <div
-              className="clay-card overflow-hidden transition-all duration-500"
-              style={{
-                opacity: cardEnter ? 1 : 0,
-                transform: cardEnter ? 'scale(1)' : 'scale(0.95)',
-              }}
+              className="clay-card overflow-hidden"
             >
               {/* Header */}
               <div

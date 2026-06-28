@@ -14,15 +14,7 @@ export default function AmudruMatchView() {
   const [showFloatingScore, setShowFloatingScore] = useState(false)
   const [shakeCard, setShakeCard] = useState(false)
   const [showReveal, setShowReveal] = useState(false)
-  const [cardEnter, setCardEnter] = useState(false)
   const [typedLetters, setTypedLetters] = useState('')
-
-  // Redirect to hub if no active game session
-  useEffect(() => {
-    if (state.teams.length === 0) {
-      navigate(routes.gameHub, { replace: true })
-    }
-  }, [state.teams.length, navigate])
 
   const puzzle = state.game2Deck[state.currentPuzzleIndex]
   const animalImageSrc = puzzle
@@ -37,11 +29,8 @@ export default function AmudruMatchView() {
   }, [state.currentPuzzleIndex, totalPuzzles])
 
   useEffect(() => {
-    setCardEnter(false)
     setShowReveal(false)
     setTypedLetters('')
-    const timer = setTimeout(() => setCardEnter(true), 100)
-    return () => clearTimeout(timer)
   }, [state.currentPuzzleIndex])
 
   useEffect(() => {
@@ -180,8 +169,6 @@ export default function AmudruMatchView() {
           id="animal-card"
           className="clay-card w-72 h-80 md:w-80 md:h-96 flex flex-col items-center justify-center overflow-hidden transition-all duration-600"
           style={{
-            opacity: cardEnter ? 1 : 0,
-            transform: cardEnter ? 'scale(1)' : 'scale(0.75)',
             animation: shakeCard ? 'shake 0.4s ease' : showReveal ? 'float 3s ease-in-out infinite' : undefined,
             border: showReveal ? '2px solid var(--clay-success)' : undefined,
           }}
