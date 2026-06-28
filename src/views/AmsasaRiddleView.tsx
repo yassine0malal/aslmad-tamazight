@@ -1,13 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useGame } from '@/context/GameContext'
-import { useNavigate } from 'react-router'
 import { ArrowRight, Check, Clock, X } from 'lucide-react'
 import { choiceLabels } from '@/data/constants'
-import { routes } from '@/lib/routes'
 
 export default function AmsasaRiddleView() {
   const { state, dispatch } = useGame()
-  const navigate = useNavigate()
 
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
   const [disabledOptionIds, setDisabledOptionIds] = useState<string[]>([])

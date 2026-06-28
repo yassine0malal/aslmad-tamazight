@@ -14,8 +14,7 @@ function TeamScoreboard() {
   const location = useLocation()
 
   // Only show on game views where teams are playing
-  const gamePaths = [routes.nextLetter, routes.animalMatch, routes.memory, routes.riddle]
-  const isGameView = gamePaths.includes(location.pathname)
+  const isGameView = [routes.nextLetter, routes.animalMatch, routes.memory, routes.riddle].includes(location.pathname as typeof routes.nextLetter)
 
   if (!isGameView || state.teams.length === 0) return null
 
