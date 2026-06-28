@@ -30,6 +30,7 @@ export default function Navbar() {
         }}
       >
         {/* Logo */}
+        
         <Link
           to={routes.gameHub}
           className="flex items-center gap-2.5 shrink-0 no-underline"
