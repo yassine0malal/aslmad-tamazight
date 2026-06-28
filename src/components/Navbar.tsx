@@ -41,6 +41,7 @@ export default function Navbar() {
             &#x2D30;&#x2D59;&#x2D4D;&#x2D4E;&#x2D30;&#x2D37;
           </span>
          
+         
         </Link>
 
         {/* Center nav links — desktop only */}
