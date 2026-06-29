@@ -4,16 +4,8 @@
   <meta charset="UTF-8" />
   <title>Asklu - Learn Tifinagh</title>
   <script>
-    // GitHub Pages SPA redirect — preserves the original path
-    var repo = '/aslmad-tamazight';
-    var path = window.location.pathname;
-    // Strip the repo prefix if present
-    if (path.startsWith(repo)) {
-      path = path.substring(repo.length);
-    }
-    // Redirect to the index with the path as a query param
-    var dest = repo + '/index.html' + path + window.location.search + window.location.hash;
-    window.location.replace(dest);
+    // GitHub Pages SPA redirect — root deployment
+    window.location.replace('/');
   </script>
   
 </head>
