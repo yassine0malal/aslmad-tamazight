@@ -14,26 +14,11 @@ export function shuffleArray<T>(items: T[]) {
   return array
 }
 
-export function playSound(effect: 'click' | 'correct' | 'wrong' = 'click') {
-  try {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext
-    const context = new AudioContext()
-    const oscillator = context.createOscillator()
-    const gain = context.createGain()
-    oscillator.connect(gain)
-    gain.connect(context.destination)
-    oscillator.type = 'triangle'
-    const frequencyMap = {
-      click: 800,
-      correct: 520,
-      wrong: 260,
-    }
-    oscillator.frequency.value = frequencyMap[effect]
-    gain.gain.value = 0.1
-    oscillator.start()
-    oscillator.stop(context.currentTime + 0.08)
-    gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.08)
-  } catch (error) {
-    // ignore browser audio restrictions
-  }
+export function assetUrl(path: string): string {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+  return `${base}${path.startsWith('/') ? path : `/${path}`}`
 }
+
+
+
+

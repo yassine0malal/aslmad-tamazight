@@ -614,7 +614,10 @@ interface SoundEffects {
 - **Turn switch:** Gentle whoosh
 - **Celebration:** Fanfare/ta-da for game completion
 
+<<<<<<< HEAD
 All sounds triggered via `playSound(key)` utility that checks `soundEnabled` state.
+=======
+>>>>>>> eff80ad ((feat): v0.1)
 
 ---
 

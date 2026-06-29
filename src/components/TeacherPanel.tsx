@@ -2,7 +2,6 @@ import { useGame } from '@/context/GameContext'
 import { Check, X, SkipForward, ArrowLeft, ArrowRight, Lightbulb, Home, RotateCcw } from 'lucide-react'
 import { useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { playSound } from '@/lib/utils'
 import { routes } from '@/lib/routes'
 
 export default function TeacherPanel() {
@@ -25,7 +24,6 @@ export default function TeacherPanel() {
   // Hooks must be called in the same order on every render — define ALL hooks before any early return
   const handleCorrect = useCallback(() => {
     if (state.selectedAnswer) {
-      playSound('correct')
       dispatch({ type: 'ANSWER_CORRECT' })
       setTimeout(() => {
         dispatch({ type: 'NEXT_PUZZLE' })
@@ -35,7 +33,6 @@ export default function TeacherPanel() {
   }, [state.selectedAnswer, dispatch])
 
   const handleIncorrect = useCallback(() => {
-    playSound('wrong')
     dispatch({ type: 'ANSWER_INCORRECT' })
     setTimeout(() => {
       dispatch({ type: 'SWITCH_TEAM' })
@@ -50,7 +47,6 @@ export default function TeacherPanel() {
       switch (e.key) {
         case 'ArrowLeft':
         case 'ArrowRight':
-          playSound('click')
           dispatch({ type: 'SWITCH_TEAM' })
           break
         case '1':
@@ -60,7 +56,6 @@ export default function TeacherPanel() {
           {
             const index = Number(e.key) - 1
             if (currentPuzzle?.options[index]) {
-              playSound('click')
               dispatch({
                 type: 'ANSWER_SELECTED',
                 payload: { answer: currentPuzzle.options[index] },
@@ -116,7 +111,6 @@ export default function TeacherPanel() {
         <div className="flex items-center justify-center gap-3 mt-4">
           <button
             onClick={() => {
-              playSound('click')
               dispatch({ type: 'SWITCH_TEAM' })
             }}
             className="w-10 h-10 flex items-center justify-center"
@@ -133,7 +127,6 @@ export default function TeacherPanel() {
           </span>
           <button
             onClick={() => {
-              playSound('click')
               dispatch({ type: 'SWITCH_TEAM' })
             }}
             className="w-10 h-10 flex items-center justify-center"
@@ -162,7 +155,6 @@ export default function TeacherPanel() {
               <button
                 key={idx}
                 onClick={() => {
-                  playSound('click')
                   dispatch({
                     type: 'ANSWER_SELECTED',
                     payload: { answer: option },
@@ -203,7 +195,6 @@ export default function TeacherPanel() {
           {'hint' in currentPuzzle && (
             <button
               onClick={() => {
-                playSound('click')
                 dispatch({ type: 'SHOW_HINT' })
               }}
               className="mt-4 w-full flex items-center justify-center gap-2 text-sm hover:underline"
@@ -245,12 +236,10 @@ export default function TeacherPanel() {
             خطأ
           </button>
 
-          <button
-            onClick={() => {
-              playSound('click')
-              dispatch({ type: 'SWITCH_TEAM' })
-              dispatch({ type: 'NEXT_PUZZLE' })
-            }}
+          <button              onClick={() => {
+                dispatch({ type: 'SWITCH_TEAM' })
+                dispatch({ type: 'NEXT_PUZZLE' })
+              }}
             className="w-full h-10 flex items-center justify-center gap-2 text-sm font-medium"
             style={{
               borderRadius: '16px',
@@ -271,7 +260,6 @@ export default function TeacherPanel() {
         <div className="flex gap-2">
           <button
             onClick={() => {
-              playSound('click')
               dispatch({ type: 'RETURN_TO_HUB' })
               navigate(routes.gameHub)
             }}
@@ -287,7 +275,6 @@ export default function TeacherPanel() {
           </button>
           <button
             onClick={() => {
-              playSound('click')
               dispatch({ type: 'NEXT_PUZZLE' })
               dispatch({ type: 'ANSWER_SELECTED', payload: { answer: '' } })
             }}

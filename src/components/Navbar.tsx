@@ -1,15 +1,15 @@
 import { Link, useLocation } from 'react-router'
 import { useGame } from '@/context/GameContext'
 import { useState, useEffect } from 'react'
-import { Volume2, VolumeX, Trophy, Menu, X } from 'lucide-react'
-import { playSound } from '@/lib/utils'
+import { Menu, X } from 'lucide-react'
+
 import { navLinks, routes } from '@/lib/routes'
 import { useIsMobile } from '@/hooks/use-mobile'
 import logo from '@/assets/logo.png'
 
 
 export default function Navbar() {
-  const { state, dispatch } = useGame()
+  const { dispatch } = useGame()
   const location = useLocation()
   const isMobile = useIsMobile()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -30,6 +30,7 @@ export default function Navbar() {
         }}
       >
         {/* Logo */}
+        
         <Link
           to={routes.gameHub}
           className="flex items-center gap-2.5 shrink-0 no-underline"
@@ -67,47 +68,13 @@ export default function Navbar() {
         )}
 
         {/* Right action buttons */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Score badge */}
-          <div
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5"
-            style={{
-              borderRadius: '9999px',
-              background: 'var(--clay-surface-card)',
-            }}
-          >
-            <Trophy className="w-3.5 h-3.5" style={{ color: 'var(--clay-ochre)' }} />
-            <span className="clay-caption" style={{ color: 'var(--clay-ink)' }}>
-              {state.teams[state.activeTeamIndex]?.score ?? 0}
-            </span>
-          </div>
-
-          {/* Sound toggle */}
-          <button
-            onClick={() => {
-              playSound('click')
-              dispatch({ type: 'TOGGLE_SOUND' })
-            }}
-            className="w-9 h-9 flex items-center justify-center transition-colors duration-150"
-            style={{
-              borderRadius: '9999px',
-              background: 'var(--clay-surface-soft)',
-              color: state.soundEnabled ? 'var(--clay-ink)' : 'var(--clay-muted)',
-            }}
-            title={state.soundEnabled ? 'كتم الصوت' : 'تشغيل الصوت'}
-          >
-            {state.soundEnabled ? (
-              <Volume2 className="w-4 h-4" />
-            ) : (
-              <VolumeX className="w-4 h-4" />
-            )}
-          </button>
+        <div className="flex items-center gap-2 shrink-0">          
+          
 
           {/* Hamburger menu — mobile only */}
           {isMobile && (
             <button
               onClick={() => {
-                playSound('click')
                 setMenuOpen(!menuOpen)
               }}
               className="w-9 h-9 flex items-center justify-center transition-colors duration-150"
@@ -125,7 +92,6 @@ export default function Navbar() {
           {/* Teacher panel toggle */}
           <button
             onClick={() => {
-              playSound('click')
               dispatch({ type: 'TOGGLE_PANEL' })
             }}
             className="w-10 h-10 p-0 flex items-center justify-center overflow-hidden"

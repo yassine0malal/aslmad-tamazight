@@ -2,9 +2,9 @@ import { useGame } from '@/context/GameContext'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { Users, Play } from 'lucide-react'
-import { playSound } from '@/lib/utils'
 import { routes } from '@/lib/routes'
 import { colorOptions, createTeamConfig } from '@/data/constants'
+import defaultImage from '../assets/default.png';
 
 export default function SetupView() {
   const { state, dispatch } = useGame()
@@ -157,7 +157,7 @@ export default function SetupView() {
                     }}
                   >
                     <img
-                      src={team.avatar}
+                      src={defaultImage}
                       alt={team.name}
                       className="w-12 h-12 object-contain"
                     />
@@ -289,7 +289,6 @@ export default function SetupView() {
         >
           <button
             onClick={() => {
-              playSound('click')
               if (canStart) {
                 dispatch({
                   type: 'START_GAME',

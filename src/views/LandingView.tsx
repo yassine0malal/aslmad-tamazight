@@ -2,7 +2,6 @@ import { useGame } from '@/context/GameContext'
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { ChevronRight, Sparkles } from 'lucide-react'
-import { playSound } from '@/lib/utils'
 import { routes } from '@/lib/routes'
 import { floatingLetters } from '@/data/constants'
 
@@ -146,7 +145,6 @@ export default function LandingView() {
         >
           <button
             onClick={() => {
-              playSound('click')
               dispatch({ type: 'START_SETUP' })
               navigate(routes.setup)
             }}

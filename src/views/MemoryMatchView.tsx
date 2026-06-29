@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { useGame } from '@/context/GameContext'
 import { useNavigate } from 'react-router'
 import { ArrowLeft, Sparkles, Brain, Trophy } from 'lucide-react'
-import { playSound } from '@/lib/utils'
 import { routes } from '@/lib/routes'
 import { MEMORY_DIFFICULTY } from '@/data/constants'
 import type { MemoryDifficultyLevel } from '@/data/constants'
@@ -31,10 +30,8 @@ export default function MemoryMatchView() {
 
     const timeout = window.setTimeout(() => {
       if (firstCard.pairId === secondCard.pairId) {
-        playSound('correct')
         dispatch({ type: 'RESET_MEMORY_SELECTION' })
       } else {
-        playSound('wrong')
         dispatch({ type: 'RESET_MEMORY_SELECTION' })
         dispatch({ type: 'SWITCH_TEAM' })
       }
@@ -56,7 +53,6 @@ export default function MemoryMatchView() {
   }
 
   const handleDifficultySelect = (level: MemoryDifficultyLevel) => {
-    playSound('click')
     dispatch({ type: 'SET_MEMORY_DIFFICULTY', payload: { cardCount: MEMORY_DIFFICULTY[level].cardCount } })
   }
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useGame } from '@/context/GameContext'
 import { ArrowRight, Check, Clock, X } from 'lucide-react'
 import { choiceLabels } from '@/data/constants'
+import { assetUrl } from '@/lib/utils'
 
 export default function AmsasaRiddleView() {
   const { state, dispatch } = useGame()
@@ -24,7 +25,7 @@ export default function AmsasaRiddleView() {
     (option) => option.id === challenge.correctAnswerId,
   )
   const imageSrc = challenge
-    ? `${import.meta.env.BASE_URL.replace(/\/$/, '')}${challenge.imageAsset}`
+    ? assetUrl(challenge.imageAsset)
     : ''
 
   const progressPct = useMemo(() => {
