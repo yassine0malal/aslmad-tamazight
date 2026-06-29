@@ -17,9 +17,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,12 +26,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: package-lock.json
+          # Using a glob pattern ensures GitHub Actions locates it without context issues
+          cache-dependency-path: '**/package-lock.json'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build Application
         run: npm run build
 
       - name: Verify build output
