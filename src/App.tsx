@@ -11,7 +11,9 @@ import NextLetterView from '@/views/NextLetterView'
 import AmudruMatchView from '@/views/AmudruMatchView'
 import MemoryMatchView from '@/views/MemoryMatchView'
 import AmsasaRiddleView from '@/views/AmsasaRiddleView'
+import ColorsGameView from '@/views/ColorsGameView'
 import SoukView from '@/views/SoukView'
+import CultureView from '@/views/CultureView'
 import GameOverView from '@/views/GameOverView'
 import { routes } from '@/lib/routes'
 
@@ -41,6 +43,9 @@ export default function App() {
         {/* Game layout — navbar + teacher panel + content area */}
         <Route element={<GameLayout />}>
           <Route path={routes.setup} element={<SetupView />} />
+          <Route path={routes.colors} element={<ColorsGameView />} />
+          <Route path={routes.culture} element={<CultureView />} />
+
           {/* All routes below require setup to be completed */}
           <Route element={<ProtectedRoute />}>
             <Route path={routes.gameHub} element={<GameHubView />} />

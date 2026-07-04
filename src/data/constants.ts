@@ -1,3 +1,5 @@
+import { teamImageList } from '@/assets/images/teams'
+
 /**
  * Centralized UI constants and configuration data.
  * All view-level constants are centralized here for maintainability.
@@ -29,10 +31,7 @@ export const colorOptions = [
   { hex: '#E8453C', label: 'أحمر' },
 ]
 
-export const defaultAvatars = [
-  '/team-atlas-lions.png',
-  '/team-barbary-monkeys.png',
-] as const
+export const defaultAvatars = teamImageList as readonly string[]
 
 export function createTeamConfig(index: number) {
   return {

@@ -5,6 +5,7 @@ import { ArrowLeft, Sparkles, Brain, Trophy } from 'lucide-react'
 import { routes } from '@/lib/routes'
 import { MEMORY_DIFFICULTY } from '@/data/constants'
 import type { MemoryDifficultyLevel } from '@/data/constants'
+import { teamImages } from '@/assets/images/teams'
 
 export default function MemoryMatchView() {
   const { state, dispatch } = useGame()
@@ -14,7 +15,7 @@ export default function MemoryMatchView() {
     id: 'team-1',
     name: 'الفريق 1',
     score: 0,
-    avatar: '/team-atlas-lions.png',
+    avatar: teamImages['atlas-lions'],
     coins: 0,
     color: '#1A54F4',
     accessories: [],

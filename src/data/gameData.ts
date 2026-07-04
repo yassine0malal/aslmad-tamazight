@@ -1,11 +1,12 @@
 import { shuffleArray } from '@/lib/utils'
 import type { LetterPuzzle, AnimalPuzzle, RiddleOption, ShopItem } from '@/types/game'
+import { animalImageList } from '@/assets/images/animals'
 
 const TIFINAGH_LETTERS = [
   'ⴰ', 'ⴱ', 'ⴳ', 'ⴷ', 'ⴹ', 'ⴻ', 'ⴼ', 'ⴽ', 'ⵀ', 'ⵃ',
-  'ⵄ', 'ⵅ', 'ⵇ', 'ⵉ', 'ⵊ', 'ⵍ', 'ⵎ', 'ⵏ', 'ⵐ', 'ⵒ',
+  'ⵄ', 'ⵅ', 'ⵇ', 'ⵉ', 'ⵊ', 'ⵍ', 'ⵎ', 'ⵏ',
   'ⵓ', 'ⵔ', 'ⵕ', 'ⵖ', 'ⵙ', 'ⵚ', 'ⵛ', 'ⵜ', 'ⵟ', 'ⵡ',
-  'ⵢ', 'ⵣ', 'ⵥ', 'ⵯ',
+  'ⵢ', 'ⵣ', 'ⵥ',
 ]
 
 const letterHints = [
@@ -21,16 +22,7 @@ const letterHints = [
   'ابحث عن الحرف التالي في السلسلة',
 ]
 
-const animalImagePaths = [
-  '/animal-eagle.png',
-  '/animal-monkey.png',
-  '/animal-lion.png',
-  '/animal-bear.png',
-  '/animal-elephant.png',
-  '/animal-fox.png',
-  '/animal-butterfly.png',
-  '/animal-fish.png',
-]
+const animalImagePaths = animalImageList
 
 const animalNameRoots = [
   'Ammar', 'Bougzem', 'Giter', 'Derna', 'Yeffer', 'Zerdas', 'Tafdalt', 'Cermen',
@@ -202,9 +194,9 @@ export const tifinaghToLatin: Record<string, string> = {
   'ⴹ': 'yaḍ', 'ⴻ': 'yey', 'ⴼ': 'yaf', 'ⴽ': 'yak',
   'ⵀ': 'yah', 'ⵃ': 'yaḥ', 'ⵄ': 'yae', 'ⵅ': 'yax',
   'ⵇ': 'yaq', 'ⵉ': 'yi', 'ⵊ': 'yaj', 'ⵍ': 'yal',
-  'ⵎ': 'yam', 'ⵏ': 'yan', 'ⵐ': 'yu', 'ⵒ': 'yar',
-  'ⵓ': 'yaw', 'ⵔ': 'yas', 'ⵕ': 'yas', 'ⵖ': 'yac',
-  'ⵙ': 'yat', 'ⵚ': 'yav', 'ⵛ': 'yac', 'ⵜ': 'yat',
-  'ⵟ': 'yat', 'ⵡ': 'yay', 'ⵢ': 'yay', 'ⵣ': 'yaz',
-  'ⵥ': 'yaz', 'ⵯ': 'yar',
+  'ⵎ': 'yam', 'ⵏ': 'yan',
+  'ⵓ': 'yu', 'ⵔ': 'yar', 'ⵕ': 'yaṛ', 'ⵖ': 'yaɣ',
+  'ⵙ': 'yas', 'ⵚ': 'yaṣ', 'ⵛ': 'yaš', 'ⵜ': 'yat',
+  'ⵟ': 'yaṭ', 'ⵡ': 'yaw', 'ⵢ': 'yay', 'ⵣ': 'yaz',
+  'ⵥ': 'yaẓ',
 }

@@ -17,9 +17,7 @@ export default function AmudruMatchView() {
   const [typedLetters, setTypedLetters] = useState('')
 
   const puzzle = state.game2Deck[state.currentPuzzleIndex]
-  const animalImageSrc = puzzle
-    ? `${import.meta.env.BASE_URL.replace(/\/$/, '')}${puzzle.animalImage}`
-    : ''
+  const animalImageSrc = puzzle ? puzzle.animalImage : ''
   const isLastPuzzle = state.currentPuzzleIndex >= state.game2Deck.length - 1
   const totalPuzzles = state.game2Deck.length
 

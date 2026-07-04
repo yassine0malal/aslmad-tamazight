@@ -81,15 +81,23 @@ export default function TeacherPanel() {
   if (!activeTeam) return null
 
   return (
-    <div
-      className="fixed right-0 top-0 h-full w-[380px] z-[100] overflow-y-auto transition-transform duration-300 ease-out"
-      style={{
-        borderRadius: '24px 0 0 24px',
-        background: 'var(--clay-canvas)',
-        borderLeft: '1px solid var(--clay-hairline)',
-        transform: state.teacherPanelOpen ? 'translateX(0)' : 'translateX(100%)',
-      }}
-    >
+    <>
+      {/* Backdrop overlay — click outside to close */}
+      {state.teacherPanelOpen && (
+        <div
+          onClick={() => dispatch({ type: 'TOGGLE_PANEL' })}
+          className="fixed inset-0 z-[99] backdrop-overlay"
+        />
+      )}
+      <div
+        className="fixed right-0 top-0 h-full w-[380px] z-[100] overflow-y-auto transition-transform duration-300 ease-out"
+        style={{
+          borderRadius: '24px 0 0 24px',
+          background: 'var(--clay-canvas)',
+          borderLeft: '1px solid var(--clay-hairline)',
+          transform: state.teacherPanelOpen ? 'translateX(0)' : 'translateX(100%)',
+        }}
+      >
       <div
         className="p-6 text-center"
         style={{ background: `${activeTeam.color}15` }}
@@ -291,5 +299,6 @@ export default function TeacherPanel() {
         </div>
       </div>
     </div>
+    </>
   )
 }

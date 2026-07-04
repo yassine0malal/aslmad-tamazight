@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer } from 'react'
 import type { AppState, GameAction } from '@/types/game'
 import { letterPuzzles, animalPuzzles, memoryPairs, riddleItems, riddleAssetIds, shopItemCosts } from '@/data/gameData'
+import { riddleImages, riddleFallbackImage } from '@/assets/riddle'
 import { shuffleArray } from '@/lib/utils'
 
 const GROUP_QUESTION_COUNT = 3
@@ -60,9 +61,9 @@ function buildRiddleDeck() {
       riddleItems.filter((item) => item.category === target.category && item.id !== target.id),
     ).slice(0, 3)
     const options = shuffleArray([target, ...sameCategory])
-    const imageAsset = riddleAssetIds.has(target.id)
-      ? `/assets/riddle/${target.id}.svg`
-      : '/animal-lion.png'
+    const imageAsset = riddleAssetIds.has(target.id) && riddleImages[target.id]
+      ? riddleImages[target.id]
+      : riddleFallbackImage
 
     return {
       id: `riddle-${index + 1}-${target.id}`,

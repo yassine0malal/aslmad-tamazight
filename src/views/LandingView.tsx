@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router'
 import { ChevronRight, Sparkles } from 'lucide-react'
 import { routes } from '@/lib/routes'
 import { floatingLetters } from '@/data/constants'
+import landingBg from '@/assets/images/landing-bg.jpg'
 
 export default function LandingView() {
   const { dispatch } = useGame()
@@ -41,7 +42,7 @@ export default function LandingView() {
       <div
         className="absolute inset-0 opacity-10"
         style={{
-          backgroundImage: 'url(/landing-bg.jpg)',
+          backgroundImage: `url(${landingBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           transform: `translate(${mousePos.x}px, ${mousePos.y}px)`,
