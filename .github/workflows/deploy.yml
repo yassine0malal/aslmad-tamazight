@@ -37,7 +37,7 @@ jobs:
           VITE_BASE_URL: /aslmad-tamazight/
 
       - name: Verify build output
-        run: ls -la dist/
+        run: ls -la dist/ && cat dist/index.html | head -5
 
       - name: Add .nojekyll file
         run: touch dist/.nojekyll
@@ -56,4 +56,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v4
