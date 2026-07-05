@@ -26,7 +26,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          # Using a glob pattern ensures GitHub Actions locates it without context issues
           cache-dependency-path: '**/package-lock.json'
 
       - name: Install dependencies
@@ -34,6 +33,8 @@ jobs:
 
       - name: Build Application
         run: npm run build
+        env:
+          VITE_BASE_URL: /aslmad-tamazight/
 
       - name: Verify build output
         run: ls -la dist/

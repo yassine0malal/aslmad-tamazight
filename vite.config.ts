@@ -1,12 +1,13 @@
-import path from "path"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
-import { inspectAttr } from 'kimi-plugin-inspect-react'
+import path from "path"
 
-// https://vite.dev/config/
+// Use env var for GitHub Pages, fallback to "/" for local dev
+const base = process.env.VITE_BASE_URL || "/"
+
 export default defineConfig({
-  base: "/aslmad-tamazight/",
-  plugins: [inspectAttr(), react()],
+  base,
+  plugins: [react()],
   server: {
     port: 3000,
   },
