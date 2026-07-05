@@ -48,6 +48,7 @@ export default function App() {
           <Route path={routes.culture} element={<CultureView />} />
           <Route path={routes.about} element={<AboutView />} />
           <Route path={routes.colors} element={<ColorsGameView />} />
+          <Route path={routes.souk} element={<SoukView />} />
 
           {/* All routes below require setup to be completed */}
           <Route element={<ProtectedRoute />}>
@@ -56,7 +57,6 @@ export default function App() {
             <Route path={routes.animalMatch} element={<AmudruMatchView />} />
             <Route path={routes.memory} element={<MemoryMatchView />} />
             <Route path={routes.riddle} element={<AmsasaRiddleView />} />
-            <Route path={routes.souk} element={<SoukView />} />
           </Route>
         </Route>
 

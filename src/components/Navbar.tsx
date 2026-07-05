@@ -86,9 +86,11 @@ export default function Navbar() {
     children.some((child) => location.pathname === child.to)
 
   // If user has completed setup (teams exist), go directly to the game.
-  // Otherwise, redirect to setup first.
+  // Otherwise, redirect to setup first, remembering which game they wanted.
   const gameRoute = (to: string) =>
-    state.teams.length > 0 ? to : routes.setup
+    state.teams.length > 0
+      ? to
+      : `${routes.setup}?redirect=${encodeURIComponent(to)}`
 
   return (
     <>
@@ -156,7 +158,7 @@ export default function Navbar() {
                   <button
                     onClick={() =>
                       group.children.length === 1
-                        ? navigate(gameRoute(group.children[0].to))
+                        ? navigate(group.children[0].to)
                         : setOpenDropdown(isOpen ? null : group.id)
                     }
                     className="flex items-center gap-1.5 px-3 py-2 transition-all duration-200"
@@ -279,7 +281,7 @@ export default function Navbar() {
                   <button
                     onClick={() => {
                       if (group.children.length === 1) {
-                        navigate(gameRoute(group.children[0].to))
+                        navigate(group.children[0].to)
                       } else {
                         setExpandedMobileGroup(isExpanded ? null : group.id)
                       }

@@ -294,7 +294,11 @@ export default function SetupView() {
                   type: 'START_GAME',
                   payload: { teams, groupCount },
                 })
-                navigate(routes.gameHub)
+                // If user came from a specific game link, go directly to that game.
+                // Otherwise default to the game hub.
+                const params = new URLSearchParams(window.location.search)
+                const redirect = params.get('redirect') || routes.gameHub
+                navigate(redirect)
               }
             }}
             disabled={!canStart}
