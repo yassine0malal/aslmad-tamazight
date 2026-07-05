@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router'
+import { Routes, Route } from 'react-router'
 import { GameProvider } from '@/context/GameContext'
 import { Toaster } from 'sonner'
 import GameLayout from '@/layouts/GameLayout'
@@ -15,6 +15,8 @@ import ColorsGameView from '@/views/ColorsGameView'
 import SoukView from '@/views/SoukView'
 import CultureView from '@/views/CultureView'
 import GameOverView from '@/views/GameOverView'
+import NotFoundView from '@/views/NotFoundView'
+import AboutView from '@/views/AboutView'
 import { routes } from '@/lib/routes'
 
 export default function App() {
@@ -34,17 +36,18 @@ export default function App() {
       />
 
       <Routes>
-        {/* Bare layout — immersive pages (landing, game-over) */}
+        {/* Bare layout — immersive pages (game-over) */}
         <Route element={<BareLayout />}>
-          <Route path={routes.landing} element={<LandingView />} />
           <Route path={routes.gameOver} element={<GameOverView />} />
         </Route>
 
         {/* Game layout — navbar + teacher panel + content area */}
         <Route element={<GameLayout />}>
+          <Route path={routes.landing} element={<LandingView />} />
           <Route path={routes.setup} element={<SetupView />} />
-          <Route path={routes.colors} element={<ColorsGameView />} />
           <Route path={routes.culture} element={<CultureView />} />
+          <Route path={routes.about} element={<AboutView />} />
+          <Route path={routes.colors} element={<ColorsGameView />} />
 
           {/* All routes below require setup to be completed */}
           <Route element={<ProtectedRoute />}>
@@ -57,8 +60,8 @@ export default function App() {
           </Route>
         </Route>
 
-        {/* Catch-all — redirect to landing */}
-        <Route path="*" element={<Navigate to={routes.landing} replace />} />
+        {/* Catch-all — 404 page for unknown routes */}
+        <Route path="*" element={<NotFoundView />} />
       </Routes>
     </GameProvider>
   )

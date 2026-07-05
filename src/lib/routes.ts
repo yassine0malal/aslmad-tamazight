@@ -10,6 +10,7 @@ export const routes = {
   colors: '/game/colors',
   culture: '/culture',
   souk: '/souk',
+  about: '/about',
   gameOver: '/gameover',
 } as const
 

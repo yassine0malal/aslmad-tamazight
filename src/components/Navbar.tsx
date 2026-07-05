@@ -1,9 +1,9 @@
 import { Link, useLocation, useNavigate } from 'react-router'
-import { useGame } from '@/context/GameContext'
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X, ChevronDown } from 'lucide-react'
+import { Menu, X, ChevronDown, Info } from 'lucide-react'
 
 import { navGroups, routes } from '@/lib/routes'
+import { useGame } from '@/context/GameContext'
 import { useIsMobile } from '@/hooks/use-mobile'
 import logo from '@/assets/logo.png'
 import iconGroups from '@/assets/icons/teams-games/groups.png'
@@ -27,7 +27,6 @@ const iconMap: Record<string, string> = {
 }
 
 export default function Navbar() {
-  const { dispatch } = useGame()
   const location = useLocation()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
@@ -80,9 +79,16 @@ export default function Navbar() {
     }, 150)
   }
 
+  const { state } = useGame()
+
   const isChildActive = (to: string) => location.pathname === to
   const isGroupActive = (children: { to: string }[]) =>
     children.some((child) => location.pathname === child.to)
+
+  // If user has completed setup (teams exist), go directly to the game.
+  // Otherwise, redirect to setup first.
+  const gameRoute = (to: string) =>
+    state.teams.length > 0 ? to : routes.setup
 
   return (
     <>
@@ -94,19 +100,9 @@ export default function Navbar() {
           borderBottom: '1px solid var(--clay-hairline)',
         }}
       >
-        {/* Right action buttons — on the right side (RTL start) */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Teacher panel toggle */}
-          <button
-            onClick={() => dispatch({ type: 'TOGGLE_PANEL' })}
-            className="w-10 h-10 p-0 flex items-center justify-center overflow-hidden"
-            style={{ borderRadius: '9999px', background: 'var(--clay-surface-soft)' }}
-            title="لوحة المعلم"
-          >
-            <img src={logo} alt="logo" className="w-full h-full object-cover" />
-          </button>
-
-          {/* Hamburger menu — mobile only */}
+        {/* Right side — Hamburger + Logo */}
+        <div className="flex items-center gap-1">
+          {/* Hamburger menu — mobile only (placed BEFORE logo) */}
           {isMobile && (
             <button
               onClick={() => {
@@ -124,6 +120,21 @@ export default function Navbar() {
               {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           )}
+
+          {/* Logo — links to landing page */}
+          <Link
+            to={routes.landing}
+            className="flex items-center gap-2 no-underline shrink-0"
+          >
+            <img src={logo} alt="Aslmad" className="w-8 h-8 object-contain" />
+            {/* App name hidden on mobile, visible on sm+ */}
+            <span
+              className="tifinagh-text text-xl font-bold leading-none hidden sm:inline"
+              style={{ color: 'var(--clay-ink)' }}
+            >
+              &#x2D30;&#x2D59;&#x2D4D;&#x2D4E;&#x2D30;&#x2D37;
+            </span>
+          </Link>
         </div>
 
         {/* Center: 3 dropdown nav tabs — desktop only */}
@@ -145,7 +156,7 @@ export default function Navbar() {
                   <button
                     onClick={() =>
                       group.children.length === 1
-                        ? navigate(group.children[0].to)
+                        ? navigate(gameRoute(group.children[0].to))
                         : setOpenDropdown(isOpen ? null : group.id)
                     }
                     className="flex items-center gap-1.5 px-3 py-2 transition-all duration-200"
@@ -186,7 +197,7 @@ export default function Navbar() {
                         return (
                           <Link
                             key={child.to}
-                            to={child.to}
+                            to={gameRoute(child.to)}
                             className="flex items-center gap-3 px-4 py-3 no-underline transition-colors duration-150"
                             style={{
                               background: childActive
@@ -230,21 +241,16 @@ export default function Navbar() {
           </nav>
         )}
 
-        {/* Logo — always links to hub, on the left side (RTL end) */}
+        {/* Logo + app name — links to about page */}
         <Link
-          to={routes.gameHub}
-          className="flex items-center gap-2.5 shrink-0 no-underline"
+          to={routes.about}
+          className="flex items-center gap-2 shrink-0 no-underline"
         >
-          <span
-            className="tifinagh-text text-2xl font-bold leading-none"
-            style={{ color: 'var(--clay-ink)' }}
-          >
-            &#x2D30;&#x2D59;&#x2D4D;&#x2D4E;&#x2D30;&#x2D37;
-          </span>
+          <button className='bg-clay-surface-strong px-4 py-1 rounded-[4px] hover:bg-clay-surface-dark hover:text-white transition-all duration-300'>من نحن</button>
         </Link>
       </header>
 
-      {/* Mobile nav drawer — accordion style */}
+      {/* Mobile nav drawer — redesign: clean, no border-radius */}
       {isMobile && (
         <div
           className="fixed top-[64px] left-0 right-0 z-40 overflow-hidden transition-all duration-300 ease-out"
@@ -253,32 +259,39 @@ export default function Navbar() {
             opacity: menuOpen ? 1 : 0,
             background: 'var(--clay-canvas)',
             borderBottom: '1px solid var(--clay-hairline)',
+            boxShadow: menuOpen ? '0 16px 48px rgba(0,0,0,0.08)' : 'none',
           }}
         >
-          <nav className="flex flex-col p-3 gap-1">
+          {/* Subtle accent bar at top */}
+          <div
+            className="h-0.5 w-full"
+            style={{ background: 'var(--clay-hairline)' }}
+          />
+
+          <nav className="flex flex-col py-2">
             {navGroups.map((group) => {
               const groupActive = isGroupActive(group.children)
               const isExpanded = expandedMobileGroup === group.id
 
               return (
                 <div key={group.id}>
-                  {/* Group header — clickable to expand */}
+                  {/* Group header */}
                   <button
                     onClick={() => {
                       if (group.children.length === 1) {
-                        navigate(group.children[0].to)
+                        navigate(gameRoute(group.children[0].to))
                       } else {
                         setExpandedMobileGroup(isExpanded ? null : group.id)
                       }
                     }}
-                    className="w-full flex items-center justify-between px-4 py-3 transition-colors duration-150"
+                    className="w-full flex items-center justify-between px-5 py-3.5 transition-colors duration-150"
                     style={{
-                      borderRadius: '10px',
                       background: groupActive ? 'var(--clay-surface-card)' : 'transparent',
                       color: groupActive ? 'var(--clay-ink)' : 'var(--clay-muted)',
+                      borderBottom: '1px solid var(--clay-hairline)',
                     }}
                   >
-                    <span className="flex items-center gap-2 clay-body-sm font-medium">
+                    <span className="flex items-center gap-2.5 clay-body-sm font-medium">
                       <img src={iconMap[group.icon]} alt="" className="w-5 h-5 object-contain" />
                       {group.label}
                     </span>
@@ -297,7 +310,7 @@ export default function Navbar() {
                       opacity: isExpanded ? 1 : 0,
                     }}
                   >
-                    <div className="flex flex-col gap-0.5 pr-6 mr-2"
+                    <div className="flex flex-col gap-0.5 pr-8 mr-3 py-1"
                       style={{ borderRight: '1px solid var(--clay-hairline)' }}
                     >
                       {group.children.map((child) => {
@@ -305,11 +318,10 @@ export default function Navbar() {
                         return (
                           <Link
                             key={child.to}
-                            to={child.to}
+                            to={gameRoute(child.to)}
                             onClick={() => setMenuOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 no-underline transition-colors duration-150"
                             style={{
-                              borderRadius: '8px',
                               background: childActive
                                 ? 'var(--clay-surface-card)'
                                 : 'transparent',
@@ -339,19 +351,34 @@ export default function Navbar() {
               )
             })}
 
-            {/* Quick hub link at bottom */}
-            <Link
-              to={routes.gameHub}
-              onClick={() => setMenuOpen(false)}
-              className="clay-body-sm px-4 py-3 mt-2 no-underline transition-colors duration-150 text-center"
-              style={{
-                borderRadius: '10px',
-                color: 'var(--clay-muted-soft)',
-                background: 'var(--clay-surface-soft)',
-              }}
+            {/* Bottom actions */}
+            <div className="mt-auto px-5 py-4 flex flex-col gap-2"
+              style={{ borderTop: '1px solid var(--clay-hairline)' }}
             >
-              🏠 العودة إلى المركز
-            </Link>
+              <Link
+                to={routes.setup}
+                onClick={() => setMenuOpen(false)}
+                className="clay-body-sm px-4 py-3 no-underline transition-colors duration-150 text-center"
+                style={{
+                  color: 'var(--clay-ink)',
+                  background: 'var(--clay-surface-card)',
+                  fontWeight: 500,
+                }}
+              >
+                &#x2190; العودة إلى الإعدادات
+              </Link>
+              <Link
+                to={routes.about}
+                onClick={() => setMenuOpen(false)}
+                className="clay-body-sm px-4 py-2.5 no-underline transition-colors duration-150 text-center"
+                style={{
+                  color: 'var(--clay-muted-soft)',
+                }}
+              >
+                <Info className="w-3.5 h-3.5 inline-block ml-1 -mt-0.5" />
+                حول التطبيق
+              </Link>
+            </div>
           </nav>
         </div>
       )}

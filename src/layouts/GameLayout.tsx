@@ -1,22 +1,35 @@
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
 import TeacherPanel from '@/components/TeacherPanel'
 import TeamScoreboard from '@/components/TeamScoreboard'
+import { routes } from '@/lib/routes'
 
 export default function GameLayout() {
-  return (
-    <div className="min-h-screen" style={{ background: 'var(--clay-canvas)' }}>
-      <Navbar />
-      <TeacherPanel />
+  const location = useLocation()
+  const isLanding = location.pathname === routes.landing
 
-      {/* Main content area — pt-24 clears the fixed 64px navbar + breathing room */}
+  return (
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: isLanding ? '#F7F3EA' : 'var(--clay-canvas)' }}
+    >
+      <Navbar />
+
+      {/* Teacher panel — only render on non-landing pages */}
+      {!isLanding && <TeacherPanel />}
+
+      {/* Main content area */}
       <main
-        className="mx-auto w-full px-4 pt-24 pb-12"
-        style={{ maxWidth: '1280px' }}
+        className={`mx-auto w-full flex-1 ${isLanding ? '' : 'px-4 pt-24 pb-12'}`}
+        style={{ maxWidth: isLanding ? 'none' : '1280px' }}
       >
-        <TeamScoreboard />
+        {/* Team scoreboard — only visible on game pages */}
+        {!isLanding && <TeamScoreboard />}
         <Outlet />
       </main>
+
+      <Footer />
     </div>
   )
 }

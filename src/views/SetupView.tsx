@@ -144,14 +144,14 @@ export default function SetupView() {
               style={{ transitionDelay: `${200 + index * 60}ms` }}
             >
               {/* Color accent bar */}
-              <div className="h-2" style={{ background: team.color }} />
+              <div className="" style={{ background: team.color }} />
 
               <div className="p-5">
                 <div className="flex items-center gap-4 mb-4">
                   <div
                     className="w-16 h-16 flex items-center justify-center shrink-0 transition-all duration-300"
                     style={{
-                      borderRadius: '16px',
+                      borderRadius: '8px',
                       background: `${team.color}15`,
                       border: `2px solid ${team.color}30`,
                     }}
