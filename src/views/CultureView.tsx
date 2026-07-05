@@ -56,7 +56,6 @@ function CultureCard({
   index,
   mode,
   isCenter,
-  scrollProgress,
 }: {
   item: CultureItem & { imageUrl: string }
   isSelected: boolean
@@ -66,7 +65,6 @@ function CultureCard({
   index: number
   mode: ViewMode
   isCenter?: boolean
-  scrollProgress?: number
 }) {
   // 3D tilt based on position from center
   const tiltX = useMotionValue(0)

@@ -202,7 +202,7 @@ export default function GameHubView() {
           className={`flex items-center justify-center gap-2 mb-10 transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
           style={{ transitionDelay: '100ms' }}
         >
-          {tabs.map((tab, idx) => {
+          {tabs.map((tab) => {
             const isActive = activeTab === tab.id
             return (
               <button
