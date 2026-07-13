@@ -4,14 +4,11 @@ import { motion } from 'framer-motion'
 import {
   ArrowRight,
   Play,
-  ChevronLeft,
-  ChevronRight,
   Star,
   CheckCircle,
   Mail,
   MapPin,
   Send,
-  Quote,
   BookOpen,
   Gamepad2,
   GraduationCap,
@@ -22,7 +19,6 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import { routes } from '@/lib/routes'
-import { useIsMobile } from '@/hooks/use-mobile'
 import imgMotto from '@/assets/images/home/tamazight-symbol.png'
 import imgHomeHero from '@/assets/images/home/index.png'
 import imgBread from '@/assets/images/home/bread.png'
@@ -103,43 +99,6 @@ const pathways: PathwayBlock[] = [
   },
 ]
 
-const testimonials = [
-  {
-    name: 'سارة أ.',
-    role: 'معلّمة لغة أمازيغية',
-    quote: 'أداة رائعة! تلاميذي أصبحوا يحبون حصة الأمازيغية بفضل التطبيق. الألعاب التفاعلية تجعل التعلم ممتعاً.',
-    rating: 5,
-    color: '#b8a4ed',
-  },
-  {
-    name: 'مصطفى ب.',
-    role: 'أب لتلميذين',
-    quote: 'أطفالي يقضون وقتاً ممتعاً وهم يتعلمون حروف تيفيناغ. أنصح به كل الآباء المهتمين بالهوية الأمازيغية.',
-    rating: 5,
-    color: '#ffb084',
-  },
-  {
-    name: 'نادية م.',
-    role: 'باحثة في الثقافة الأمازيغية',
-    quote: 'مبادرة ممتازة لنشر الثقافة الأمازيغية بأسلوب عصري. المحتوى دقيق والتصميم جميل جداً.',
-    rating: 5,
-    color: '#a4d4c5',
-  },
-  {
-    name: 'يونس ك.',
-    role: 'طالب جامعي',
-    quote: 'كنت أبحث عن طريقة سهلة لتعلم الحروف. هذا التطبيق جعل الرحلة ممتعة وسهلة. شكراً للفريق!',
-    rating: 5,
-    color: '#e8b94a',
-  },
-  {
-    name: 'حليمة ر.',
-    role: 'مربية أطفال',
-    quote: 'الأطفال في الروضة يعشقون لعبة الألوان. التطبيق مناسب حتى للصغار جداً. تصميم رائع!',
-    rating: 4,
-    color: '#ff6b5a',
-  },
-]
 
 const featureCards = [
   {

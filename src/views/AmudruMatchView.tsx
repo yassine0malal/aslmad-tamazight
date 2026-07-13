@@ -21,7 +21,7 @@ export default function AmudruMatchView() {
   const [filledSlots, setFilledSlots] = useState<string[]>([])
   const [currentSlot, setCurrentSlot] = useState(0)
   const slotRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> >()
+  const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const puzzle = state.game2Deck[state.currentPuzzleIndex]
   const animalImageSrc = puzzle ? puzzle.animalImage : ''
