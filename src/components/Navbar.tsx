@@ -6,6 +6,7 @@ import { navGroups, routes } from '@/lib/routes'
 import { useGame } from '@/context/GameContext'
 import { useIsMobile } from '@/hooks/use-mobile'
 import logo from '@/assets/logo.png'
+import iconAll from '@/assets/icons/teams-games/all.png'
 import iconGroups from '@/assets/icons/teams-games/groups.png'
 import iconNextLetter from '@/assets/icons/teams-games/next-letter.png'
 import iconAnimal from '@/assets/icons/teams-games/animal.png'
@@ -16,6 +17,7 @@ import iconMarket from '@/assets/icons/market/market.png'
 import iconCulture from '@/assets/icons/culture.png'
 
 const iconMap: Record<string, string> = {
+  'all': iconAll,
   'groups': iconGroups,
   'next-letter': iconNextLetter,
   'animal': iconAnimal,

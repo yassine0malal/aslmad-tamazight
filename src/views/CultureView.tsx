@@ -92,7 +92,7 @@ function CultureCard({
   return (
     <motion.div
       layout
-      className="group cursor-pointer"
+      className="group cursor-pointer m-5"
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: '-60px' }}

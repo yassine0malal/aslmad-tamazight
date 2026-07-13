@@ -40,6 +40,7 @@ export const navGroups: NavGroup[] = [
       { to: routes.animalMatch, label: 'مباراة الحيوانات', icon: 'animal', description: 'اختر الحرف الصحيح للحيوان' },
       { to: routes.memory, label: 'لعبة الذاكرة', icon: 'mind', description: 'ابحث عن الأزواج المطابقة' },
       { to: routes.riddle, label: 'أمساسا ن توالفت', icon: 'picture-quiz', description: 'لعبة التخمين بالصور' },
+      { to: routes.gameHub, label: 'المركز', icon: 'all', description: 'الكل' },
     ],
   },
   {

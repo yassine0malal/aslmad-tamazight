@@ -1065,198 +1065,39 @@ function VideoSection() {
    TESTIMONIALS CAROUSEL
    ─────────────────────────────────────────────────────────────── */
 
-function TestimonialsSection() {
-  const [activeIdx, setActiveIdx] = useState(1)
-  const isMobile = useIsMobile()
+// function TestimonialsSection() {
+//   const [activeIdx, setActiveIdx] = useState(1)
+//   const isMobile = useIsMobile()
 
-  // Responsive card dimensions — init with desktop default, re-compute once mounted
-  const cardWidth = isMobile ? '85vw' : '320px'
-  const cardHeight = isMobile ? '360px' : '380px'
-  const cardPadding = isMobile ? '20px' : '32px'
-  const cardGap = isMobile ? 12 : 32
-  const numericWidth = typeof window !== 'undefined'
-    ? (isMobile ? Math.min(window.innerWidth * 0.85, 320) : 320)
-    : 320
+//   // Responsive card dimensions — init with desktop default, re-compute once mounted
+//   const cardWidth = isMobile ? '85vw' : '320px'
+//   const cardHeight = isMobile ? '360px' : '380px'
+//   const cardPadding = isMobile ? '20px' : '32px'
+//   const cardGap = isMobile ? 12 : 32
+//   const numericWidth = typeof window !== 'undefined'
+//     ? (isMobile ? Math.min(window.innerWidth * 0.85, 320) : 320)
+//     : 320
 
-  const prev = () => setActiveIdx((i) => (i - 1 + testimonials.length) % testimonials.length)
-  const next = () => setActiveIdx((i) => (i + 1) % testimonials.length)
+//   const prev = () => setActiveIdx((i) => (i - 1 + testimonials.length) % testimonials.length)
+//   const next = () => setActiveIdx((i) => (i + 1) % testimonials.length)
 
-  const getCardTransform = (idx: number) => {
-    const diff = (idx - activeIdx + testimonials.length) % testimonials.length
-    const normalized = diff > 2 ? diff - testimonials.length : diff
-    return normalized
-  }
+//   const getCardTransform = (idx: number) => {
+//     const diff = (idx - activeIdx + testimonials.length) % testimonials.length
+//     const normalized = diff > 2 ? diff - testimonials.length : diff
+//     return normalized
+//   }
 
-  return (
-    <section id="testimonials" className={SECTIONS_TOP_BOTTOM}>
-      <div className={`${CONTAINER} ${MAX_W}`}>
-        <AnimatedSection>
-          <div className="text-center mb-8 md:mb-12" dir="rtl">
-            <motion.div
-              className="inline-flex items-center gap-2 px-4 py-1.5 mb-4"
-              style={{ background: '#f0ebe0', borderRadius: '999px' }}
-            >
-              <Quote className="w-3.5 h-3.5" style={{ color: '#c49530' }} />
-              <span className="text-xs font-semibold" style={{ color: '#8B6914' }}>آراء المستخدمين</span>
-            </motion.div>
-            <h2
-              className="font-bold leading-snug px-4"
-              style={{
-                fontSize: 'clamp(24px, 5vw, 42px)',
-                color: '#0a0a0a',
-              }}
-            >
-              ماذا يقول عنا<br className="sm:hidden" />
-              <span style={{ color: '#c49530' }}>المستخدمون؟</span>
-            </h2>
-            <p className="text-sm md:text-base max-w-lg mx-auto px-4" style={{ color: '#5a5a5a' }}>
-              تجارب حقيقية من مستخدمينا حول العالم
-            </p>
-          </div>
+//   return (
+//     <section id="testimonials" className={SECTIONS_TOP_BOTTOM}>
+//       <div className={`${CONTAINER} ${MAX_W}`}>
+//         {/* <AnimatedSection>
 
-          {/* Carousel */}
-          <div className={`relative overflow-hidden ${isMobile ? 'py-3' : 'py-5'}`}>
-            <div className="flex items-center justify-center gap-3 md:gap-8">
-              {testimonials.map((t, idx) => {
-                const offset = getCardTransform(idx)
-                const moveX = offset * (numericWidth + cardGap)
-
-                return (
-                  <motion.div
-                    key={idx}
-                    className="shrink-0"
-                    style={{
-                      width: cardWidth,
-                      maxWidth: '320px',
-                      height: cardHeight,
-                      borderRadius: '20px',
-                      border: '1px solid #ddd',
-                      background: '#ffffff',
-                      padding: cardPadding,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      cursor: idx === activeIdx ? 'default' : 'pointer',
-                    }}
-                    animate={{
-                      x: moveX,
-                      scale: offset === 0 ? 1 : 0.88,
-                      opacity: offset === 0 ? 1 : 0.4,
-                      zIndex: offset === 0 ? 2 : 1,
-                    }}
-                    transition={{ duration: 0.6, ease: 'easeInOut' }}
-                    whileHover={offset !== 0 ? { opacity: 0.6 } : {}}
-                    onClick={() => setActiveIdx(idx)}
-                    dir="rtl"
-                  >
-                    {/* Quote */}
-                    <p className="flex-1 text-sm leading-relaxed" style={{ color: '#3a3a3a' }}>
-                      "{t.quote}"
-                    </p>
-
-                    {/* Rating */}
-                    <div className="flex items-center gap-0.5 mb-3">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className="w-4 h-4"
-                          style={{ color: i < t.rating ? '#e8b94a' : '#ddd', fill: i < t.rating ? '#e8b94a' : 'none' }}
-                        />
-                      ))}
-                    </div>
-
-                    {/* Author */}
-                    <div className="flex items-center gap-3 pt-3" style={{ borderTop: '1px solid #eee' }}>
-                      <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                        style={{ background: t.color }}
-                      >
-                        {t.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold" style={{ color: '#0a0a0a' }}>{t.name}</div>
-                        <div className="text-xs" style={{ color: '#8a8a8a' }}>{t.role}</div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )
-              })}
-            </div>
-
-            {/* Nav arrows — RTL: ← للسابق, → للتالي */}
-            <div className="flex items-center justify-center gap-3 md:gap-5 mt-8 md:mt-10" dir="rtl">
-              {/* Previous — icon-only on mobile, icon+text on desktop */}
-              <motion.button
-                onClick={prev}
-                className="flex items-center justify-center border-none cursor-pointer shrink-0"
-                style={{
-                  width: isMobile ? '40px' : 'auto',
-                  height: isMobile ? '40px' : '44px',
-                  padding: isMobile ? '0' : '0 20px',
-                  borderRadius: '999px',
-                  background: '#f0ebe0',
-                  color: '#0a0a0a',
-                  border: '1px solid transparent',
-                }}
-                whileHover={{
-                  scale: 1.08,
-                  background: '#0a0a0a',
-                  color: '#ffffff',
-                  borderColor: '#0a0a0a',
-                }}
-                whileTap={{ scale: 0.92 }}
-                aria-label="السابق"
-              >
-                <ChevronRight className="w-4 h-4" />
-                {!isMobile && <span className="text-sm font-medium whitespace-nowrap">السابق</span>}
-              </motion.button>
-
-              {/* Dots — elegant pill */}
-              <div className="flex items-center gap-2 px-3 md:px-4 py-2" style={{ borderRadius: '999px', background: '#f0ebe0' }}>
-                {testimonials.map((_, i) => (
-                  <motion.button
-                    key={i}
-                    onClick={() => setActiveIdx(i)}
-                    className="border-none cursor-pointer rounded-full"
-                    style={{
-                      height: '8px',
-                      minHeight: '8px',
-                    }}
-                    animate={{
-                      width: i === activeIdx ? '24px' : '8px',
-                      background: i === activeIdx ? '#0a0a0a' : '#d0c8b8',
-                    }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    aria-label={`الانتقال إلى التعليق ${i + 1}`}
-                  />
-                ))}
-              </div>
-
-              {/* Next — icon-only on mobile, icon+text on desktop */}
-              <motion.button
-                onClick={next}
-                className="flex items-center justify-center border-none cursor-pointer shrink-0"
-                style={{
-                  width: isMobile ? '40px' : 'auto',
-                  height: isMobile ? '40px' : '44px',
-                  padding: isMobile ? '0' : '0 20px',
-                  borderRadius: '999px',
-                  background: '#0a0a0a',
-                  color: '#ffffff',
-                }}
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                aria-label="التالي"
-              >
-                {!isMobile && <span className="text-sm font-medium whitespace-nowrap">التالي</span>}
-                <ChevronLeft className="w-4 h-4" />
-              </motion.button>
-            </div>
-          </div>
-        </AnimatedSection>
-      </div>
-    </section>
-  )
-}
+        
+//         </AnimatedSection> */}
+//       </div>
+//     </section>
+//   )
+// }
 
 /* ───────────────────────────────────────────────────────────────
    FIVE PATHWAYS SECTION (Alternating)
@@ -1866,7 +1707,7 @@ export default function LandingView() {
 
       <HowItWorksSection />
       <VideoSection />
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
       <PathwaysSection />
       <CTABanner />
       <FeatureCardsSection />

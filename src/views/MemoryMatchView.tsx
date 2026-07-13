@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useGame } from '@/context/GameContext'
 import { useNavigate } from 'react-router'
-import { ArrowLeft, Sparkles, Brain, Trophy } from 'lucide-react'
+import { ArrowLeft, Sparkles, Brain, Trophy, Eye, Clock } from 'lucide-react'
 import { routes } from '@/lib/routes'
 import { MEMORY_DIFFICULTY } from '@/data/constants'
 import type { MemoryDifficultyLevel } from '@/data/constants'
@@ -10,6 +10,9 @@ import { teamImages } from '@/assets/images/teams'
 export default function MemoryMatchView() {
   const { state, dispatch } = useGame()
   const navigate = useNavigate()
+  const [previewActive, setPreviewActive] = useState(false)
+  const [previewCountdown, setPreviewCountdown] = useState(0)
+  const prevDifficulty = useRef<number | null>(state.memoryDifficulty)
 
   const activeTeam = state.teams[state.activeTeamIndex] || {
     id: 'team-1',
@@ -21,6 +24,32 @@ export default function MemoryMatchView() {
     accessories: [],
   }
 
+  // ─── Preview phase: show all cards briefly when game starts ───
+  useEffect(() => {
+    if (state.memoryDeck.length > 0 && state.memoryDifficulty !== prevDifficulty.current) {
+      prevDifficulty.current = state.memoryDifficulty
+      // Show preview for 4 seconds + 1 extra second per 10 cards beyond 10
+      const extraTime = Math.max(0, Math.floor((state.memoryDeck.length - 10) / 10))
+      const previewSeconds = Math.min(4 + extraTime, 6) // max 6 seconds
+      setPreviewCountdown(previewSeconds)
+      setPreviewActive(true)
+    }
+  }, [state.memoryDifficulty, state.memoryDeck.length])
+
+  // ─── Countdown tick ───
+  useEffect(() => {
+    if (!previewActive) return
+    if (previewCountdown <= 0) {
+      setPreviewActive(false)
+      return
+    }
+    const timer = setTimeout(() => {
+      setPreviewCountdown((prev) => prev - 1)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [previewActive, previewCountdown])
+
+  // ─── Match logic (existing) ───
   useEffect(() => {
     if (state.memorySelection.length !== 2 || state.memoryCompleted) return
 
@@ -46,7 +75,7 @@ export default function MemoryMatchView() {
   const isFinished = state.memoryCompleted || (cardCount > 0 && matchedCount === cardCount)
 
   const handleCardClick = (cardId: string) => {
-    if (state.memoryCompleted) return
+    if (previewActive || state.memoryCompleted) return
     if (state.memorySelection.length >= 2) return
     const card = state.memoryDeck.find((item) => item.id === cardId)
     if (!card || card.isFlipped || card.isMatched) return
@@ -57,36 +86,58 @@ export default function MemoryMatchView() {
     dispatch({ type: 'SET_MEMORY_DIFFICULTY', payload: { cardCount: MEMORY_DIFFICULTY[level].cardCount } })
   }
 
-  // Determine grid columns based on card count
+  // ─── Responsive grid & sizing — more aggressive for larger decks ───
+  const getGridGap = () => {
+    if (cardCount <= 10) return 'gap-3 md:gap-4'
+    if (cardCount <= 16) return 'gap-2 md:gap-3'
+    return 'gap-1.5 md:gap-2'
+  }
+
   const getGridCols = () => {
     if (cardCount <= 10) return 'grid-cols-5'
     if (cardCount <= 16) return 'grid-cols-4'
-    return 'grid-cols-5'
+    if (cardCount <= 20) return 'grid-cols-5'
+    return 'grid-cols-5 sm:grid-cols-6'
   }
 
-  // Determine card size based on card count
   const getCardImageSize = () => {
-    if (cardCount <= 10) return 'h-20 w-20 md:h-24 md:w-24'
-    if (cardCount <= 16) return 'h-16 w-16 md:h-20 md:w-20'
-    return 'h-12 w-12 md:h-16 md:w-16'
+    if (cardCount <= 10) return 'h-14 w-14 md:h-20 md:w-20'
+    if (cardCount <= 16) return 'h-12 w-12 md:h-16 md:w-16'
+    if (cardCount <= 20) return 'h-10 w-10 md:h-14 md:w-14'
+    return 'h-8 w-8 md:h-10 md:w-10'
   }
 
   const getCardLabelSize = () => {
-    if (cardCount <= 10) return 'text-xl md:text-2xl'
-    if (cardCount <= 16) return 'text-lg md:text-xl'
-    return 'text-sm md:text-base'
+    if (cardCount <= 10) return 'text-sm md:text-xl'
+    if (cardCount <= 16) return 'text-xs md:text-base'
+    if (cardCount <= 20) return 'text-[10px] md:text-sm'
+    return 'text-[9px] md:text-xs'
   }
 
   const getCardBackSize = () => {
-    if (cardCount <= 10) return 'text-4xl md:text-5xl'
-    if (cardCount <= 16) return 'text-3xl md:text-4xl'
-    return 'text-xl md:text-3xl'
+    if (cardCount <= 10) return 'text-2xl md:text-4xl'
+    if (cardCount <= 16) return 'text-xl md:text-3xl'
+    if (cardCount <= 20) return 'text-base md:text-2xl'
+    return 'text-sm md:text-lg'
   }
 
   const getCardAspectRatio = () => {
     if (cardCount <= 10) return 'aspect-[4/5]'
     if (cardCount <= 16) return 'aspect-[3/4]'
+    if (cardCount <= 20) return 'aspect-[3/4]'
     return 'aspect-[2/3]'
+  }
+
+  const getCardRadius = () => {
+    if (cardCount <= 10) return '16px'
+    if (cardCount <= 16) return '14px'
+    return '10px'
+  }
+
+  const getCardPadding = () => {
+    if (cardCount <= 10) return 'px-2 py-1'
+    if (cardCount <= 16) return 'px-1.5 py-1'
+    return 'px-1 py-0.5'
   }
 
   // If no difficulty selected yet, show the difficulty picker
@@ -181,8 +232,55 @@ export default function MemoryMatchView() {
 
   return (
     <div className="min-h-screen w-full pb-12">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+      <div className="max-w-6xl mx-auto px-2 md:px-4">
+        {/* ─── Preview Banner ─── */}
+        {previewActive && (
+          <div
+            className="mb-4 p-3 md:p-5 text-center animate-pop-in"
+            style={{
+              borderRadius: '20px',
+              background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Eye className="w-5 h-5 md:w-6 md:h-6" style={{ color: '#e8b94a' }} />
+              <span
+                className="font-bold text-lg md:text-xl"
+                style={{ color: '#ffffff' }}
+              >
+                تذكَّر البطاقات!
+              </span>
+              <Clock className="w-5 h-5 md:w-6 md:h-6" style={{ color: '#e8b94a' }} />
+            </div>
+            <p className="text-sm md:text-base mb-3" style={{ color: 'rgba(255,255,255,0.7)' }}>
+              البطاقات مكشوفة الآن — ركّز واحفظ مواقعها قبل أن تغلق.
+            </p>
+            {/* Countdown ring */}
+            <div
+              className="inline-flex items-center gap-2 px-4 py-2"
+              style={{
+                borderRadius: '9999px',
+                background: 'rgba(255,255,255,0.1)',
+              }}
+            >
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-lg animate-pulse"
+                style={{
+                  background:
+                    previewCountdown <= 2 ? '#ef4444' : previewCountdown <= 4 ? '#e8b94a' : '#22c55e',
+                }}
+              >
+                {previewCountdown}
+              </div>
+              <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                ثانية متبقية
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
           <div>
             <h2 className="clay-title-md mb-1" style={{ color: 'var(--clay-ink)' }}>
               ⵓⵔⴰⵔⵏ ⵏ ⵜⴽⴰⵜⵓⵜ
@@ -256,7 +354,7 @@ export default function MemoryMatchView() {
         </div>
 
         {/* Game grid */}
-        <div className={`grid gap-3 md:gap-4 mb-6 ${getGridCols()}`}>
+        <div className={`grid ${getGridGap()} mb-4 ${getGridCols()}`}>
           {state.memoryDeck.map((card, index) => {
             const isSelected = state.memorySelection.includes(card.id)
             const showFace = card.isFlipped || card.isMatched
@@ -265,39 +363,51 @@ export default function MemoryMatchView() {
                 key={card.id}
                 onClick={() => handleCardClick(card.id)}
                 disabled={
+                  previewActive ||
                   card.isMatched ||
                   (state.memorySelection.length >= 2 && !isSelected) ||
                   state.memoryCompleted
                 }
-                className={`relative ${getCardAspectRatio()} flex flex-col items-center justify-center transition-all duration-300 focus:outline-none active:scale-[0.97]`}
+                className={`relative ${getCardAspectRatio()} flex flex-col items-center justify-center transition-all duration-300 focus:outline-none ${
+                  previewActive ? 'cursor-default' : 'active:scale-[0.97]'
+                } ${previewActive ? 'shadow-lg scale-[1.02]' : ''}`}
                 style={{
-                  borderRadius: '20px',
-                  border: card.isMatched
-                    ? '3px solid var(--clay-success)'
-                    : isSelected
-                      ? '3px solid var(--clay-lavender)'
-                      : '2px solid var(--clay-hairline)',
-                  background: card.isMatched
-                    ? 'var(--clay-surface-soft)'
-                    : isSelected
-                      ? 'white'
-                      : 'var(--clay-canvas)',
+                  borderRadius: getCardRadius(),
+                  border: previewActive
+                    ? '2px solid #e8b94a'
+                    : card.isMatched
+                      ? '3px solid var(--clay-success)'
+                      : isSelected
+                        ? '3px solid var(--clay-lavender)'
+                        : '2px solid var(--clay-hairline)',
+                  background: previewActive
+                    ? '#ffffff'
+                    : card.isMatched
+                      ? 'var(--clay-surface-soft)'
+                      : isSelected
+                        ? 'white'
+                        : 'var(--clay-canvas)',
+                  boxShadow: previewActive
+                    ? '0 4px 20px rgba(232, 185, 74, 0.3)'
+                    : 'none',
                 }}
               >
-                <div className="absolute inset-0 flex flex-col items-center justify-center px-2 text-center">
-                  {showFace ? (
+                <div className={`absolute inset-0 flex flex-col items-center justify-center text-center ${getCardPadding()}`}>
+                  {(showFace || previewActive) ? (
                     <>
                       <img
                         src={card.image}
                         alt={card.label}
                         className={`${getCardImageSize()} object-contain mb-2`}
                       />
-                      <div
-                        className={`${getCardLabelSize()} font-bold tracking-widest leading-tight`}
-                        style={{ color: 'var(--clay-ink)' }}
-                      >
-                        {card.label}
-                      </div>
+                              {cardCount <= 20 && (
+                        <div
+                          className={`${getCardLabelSize()} font-bold tracking-widest leading-tight mt-1`}
+                          style={{ color: 'var(--clay-ink)' }}
+                        >
+                          {card.label}
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>
@@ -322,37 +432,53 @@ export default function MemoryMatchView() {
         </div>
 
         {/* Stats and controls */}
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
-          <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 md:gap-3 mb-4">
+          <div
+            className="clay-card px-3 py-2 md:px-4 md:py-3"
+            style={{ borderRadius: '14px' }}
+          >
             <div
-              className="clay-card px-4 py-3 flex-1 md:flex-none"
-              style={{ borderRadius: '16px' }}
+              className="clay-caption mb-0.5"
+              style={{ color: 'var(--clay-muted)', fontSize: '10px' }}
             >
-              <div
-                className="clay-caption mb-1"
-                style={{ color: 'var(--clay-muted)', fontSize: '11px' }}
-              >
-                الاختيارات
-              </div>
-              <div className="font-bold" style={{ color: 'var(--clay-ink)' }}>
-                {state.memorySelection.length} / 2
-              </div>
+              الاختيارات
             </div>
-            <div
-              className="clay-card px-4 py-3 flex-1 md:flex-none"
-              style={{ borderRadius: '16px' }}
-            >
-              <div
-                className="clay-caption mb-1"
-                style={{ color: 'var(--clay-muted)', fontSize: '11px' }}
-              >
-                الأزواج
-              </div>
-              <div className="font-bold" style={{ color: 'var(--clay-mint)' }}>
-                {matchedCount / 2} / {cardCount / 2}
-              </div>
+            <div className="font-bold text-sm md:text-base" style={{ color: 'var(--clay-ink)' }}>
+              {state.memorySelection.length} / 2
             </div>
           </div>
+          <div
+            className="clay-card px-3 py-2 md:px-4 md:py-3"
+            style={{ borderRadius: '14px' }}
+          >
+            <div
+              className="clay-caption mb-0.5"
+              style={{ color: 'var(--clay-muted)', fontSize: '10px' }}
+            >
+              الأزواج
+            </div>
+            <div className="font-bold text-sm md:text-base" style={{ color: 'var(--clay-mint)' }}>
+              {matchedCount / 2} / {cardCount / 2}
+            </div>
+          </div>
+          {previewActive && (
+            <div
+              className="clay-card px-3 py-2 md:px-4 md:py-3"
+              style={{
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                border: '1px solid rgba(232, 185, 74, 0.3)',
+              }}
+            >
+              <div className="text-[10px] mb-0.5" style={{ color: '#e8b94a' }}>
+                التذكُّر
+              </div>
+              <div className="font-bold text-sm md:text-base flex items-center gap-1" style={{ color: '#ffffff' }}>
+                <Clock className="w-3 h-3" />
+                {previewCountdown}ث
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Finished state */}
