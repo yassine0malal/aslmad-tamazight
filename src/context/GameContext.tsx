@@ -1,7 +1,14 @@
 import React, { createContext, useContext, useReducer } from 'react'
 import type { AppState, GameAction } from '@/types/game'
-import { letterPuzzles, animalPuzzles, memoryPairs, riddleItems, riddleAssetIds, shopItemCosts } from '@/data/gameData'
-import { riddleImages, riddleFallbackImage } from '@/assets/riddle'
+import {
+  buildLetterPuzzles,
+  letterPuzzles,
+  wordPuzzles,
+  memoryPairs,
+  riddleItems,
+} from '@/data/gameData'
+import { vocabularyWords, type VocabularyWord } from '@/data/vocabularyData'
+import { getWordSet } from '@/data/wordSets'
 import { shuffleArray } from '@/lib/utils'
 
 const GROUP_QUESTION_COUNT = 3
@@ -9,17 +16,19 @@ const GROUP_QUESTION_COUNT = 3
 function buildMemoryDeck(pairCount: number) {
   const selectedPairs = shuffleArray(memoryPairs).slice(0, pairCount)
   const cards = selectedPairs.flatMap((pair) => [
-    { id: `${pair.pairId}-a`, pairId: pair.pairId, label: pair.label, image: pair.image, isFlipped: false, isMatched: false },
-    { id: `${pair.pairId}-b`, pairId: pair.pairId, label: pair.label, image: pair.image, isFlipped: false, isMatched: false },
+    { id: `${pair.pairId}-a`, pairId: pair.pairId, label: pair.label, emoji: pair.emoji, isFlipped: false, isMatched: false },
+    { id: `${pair.pairId}-b`, pairId: pair.pairId, label: pair.label, emoji: pair.emoji, isFlipped: false, isMatched: false },
   ])
   return shuffleArray(cards)
 }
 
-function buildLetterDeck(groupCount: number) {
+function buildLetterDeck(groupCount: number, puzzles = letterPuzzles) {
   const total = groupCount * GROUP_QUESTION_COUNT * 2
-  const pool = shuffleArray(letterPuzzles)
+  const pool = shuffleArray(puzzles)
   const deck: AppState['game1Deck'] = []
   let index = 0
+
+  if (pool.length === 0) return deck
 
   while (deck.length < total) {
     const base = pool[index % pool.length]
@@ -34,42 +43,76 @@ function buildLetterDeck(groupCount: number) {
   return deck
 }
 
-function buildAnimalDeck(groupCount: number) {
+function buildLetterDeckWithWordSet(groupCount: number, wordSetId: string) {
+  const wordSet = getWordSet(wordSetId)
+  const setWords: VocabularyWord[] = wordSet
+    ? wordSet.words
+        .map((tifinagh) => vocabularyWords.find((word) => word.tifinagh === tifinagh))
+        .filter((word): word is VocabularyWord => Boolean(word))
+    : []
+
+  // Only words whose next letter is unambiguous make a puzzle; a set without
+  // any of them falls back to the whole vocabulary so the round always runs.
+  const setPuzzles = setWords.length > 0 ? buildLetterPuzzles(setWords) : []
+  return buildLetterDeck(groupCount, setPuzzles.length > 0 ? setPuzzles : letterPuzzles)
+}
+
+function buildWordDeck(groupCount: number, wordSetId?: string) {
   const total = groupCount * GROUP_QUESTION_COUNT * 2
-  const pool = shuffleArray(animalPuzzles)
+  const wordSet = wordSetId ? getWordSet(wordSetId) : undefined
+
+  // A teacher-chosen set restricts the questions to those words;
+  // otherwise the whole vocabulary is the pool (random mode).
+  const setPuzzles = wordSet
+    ? wordSet.words
+        .map((tifinagh) => vocabularyWords.find((word) => word.tifinagh === tifinagh))
+        .filter((word): word is (typeof vocabularyWords)[number] => Boolean(word))
+        .map((word) => ({
+          id: word.id,
+          wordTifinagh: word.tifinagh,
+          wordArabic: word.arabic,
+          wordLatin: word.latin,
+          emoji: word.emoji,
+        }))
+    : undefined
+
+  const pool = shuffleArray(setPuzzles && setPuzzles.length > 0 ? setPuzzles : wordPuzzles)
   const deck: AppState['game2Deck'] = []
   let index = 0
 
   while (deck.length < total) {
-    const base = pool[index % pool.length]
-    const options = shuffleArray(base.options)
-    deck.push({
-      ...base,
-      options,
-    })
+    deck.push(pool[index % pool.length])
     index += 1
   }
 
   return deck
 }
 
-function buildRiddleDeck() {
-  const selectedTargets = shuffleArray(riddleItems).slice(0, Math.min(100, riddleItems.length))
+function buildRiddleDeck(groupCount: number) {
+  // Same length as the other games: it follows the setup configuration
+  // (groups × questions per group × two halves) instead of the full pool.
+  const total = groupCount * GROUP_QUESTION_COUNT * 2
+  const pool = shuffleArray(riddleItems)
+  const selectedTargets = Array.from(
+    { length: total },
+    (_, index) => pool[index % pool.length],
+  )
 
   const deck: AppState['game4Deck'] = selectedTargets.map((target, index) => {
     const sameCategory = shuffleArray(
       riddleItems.filter((item) => item.category === target.category && item.id !== target.id),
     ).slice(0, 3)
-    const options = shuffleArray([target, ...sameCategory])
-    const imageAsset = riddleAssetIds.has(target.id) && riddleImages[target.id]
-      ? riddleImages[target.id]
-      : riddleFallbackImage
+
+    const fallback = shuffleArray(
+      riddleItems.filter(
+        (item) => item.id !== target.id && !sameCategory.some((option) => option.id === item.id),
+      ),
+    ).slice(0, 3 - sameCategory.length)
 
     return {
       id: `riddle-${index + 1}-${target.id}`,
-      imageAsset,
       correctAnswerId: target.id,
-      options,
+      options: shuffleArray([target, ...sameCategory, ...fallback]),
     }
   })
 
@@ -133,9 +176,7 @@ function gameReducer(state: AppState, action: GameAction): AppState {
         name: team.name,
         score: 0,
         avatar: team.avatar,
-        coins: 0,
         color: team.color,
-        accessories: [],
       }))
       return {
         ...state,
@@ -148,8 +189,8 @@ function gameReducer(state: AppState, action: GameAction): AppState {
         groupCount: Math.max(1, action.payload.groupCount),
         matchHalf: 1,
         game1Deck: buildLetterDeck(action.payload.groupCount),
-        game2Deck: buildAnimalDeck(action.payload.groupCount),
-        game4Deck: buildRiddleDeck(),
+        game2Deck: buildWordDeck(action.payload.groupCount),
+        game4Deck: buildRiddleDeck(action.payload.groupCount),
         memoryDeck: [],
         memoryDifficulty: null,
         memorySelection: [],
@@ -190,6 +231,42 @@ function gameReducer(state: AppState, action: GameAction): AppState {
         }),
       }
 
+    case 'SET_LETTER_DECK': {
+      return {
+        ...state,
+        game1Deck: action.payload.wordSetId
+          ? buildLetterDeckWithWordSet(state.groupCount, action.payload.wordSetId)
+          : buildLetterDeck(state.groupCount),
+        currentPuzzleIndex: 0,
+        currentGroupIndex: 0,
+        currentGroupQuestionIndex: 0,
+        matchHalf: 1,
+        selectedAnswer: null,
+        lastAnswerCorrect: null,
+        showHint: false,
+        game1Completed: false,
+      }
+    }
+
+    case 'SET_WORD_DECK': {
+      const newGame1Deck = action.payload.wordSetId
+        ? buildLetterDeckWithWordSet(state.groupCount, action.payload.wordSetId)
+        : buildLetterDeck(state.groupCount)
+      return {
+        ...state,
+        game1Deck: newGame1Deck,
+        game2Deck: buildWordDeck(state.groupCount, action.payload.wordSetId),
+        currentPuzzleIndex: 0,
+        currentGroupIndex: 0,
+        currentGroupQuestionIndex: 0,
+        matchHalf: 1,
+        selectedAnswer: null,
+        lastAnswerCorrect: null,
+        game2Completed: false,
+        game1Completed: false,
+      }
+    }
+
     case 'NEXT_PUZZLE': {
       const totalQuestions =
         state.view === 'game1'
@@ -204,6 +281,22 @@ function gameReducer(state: AppState, action: GameAction): AppState {
       let nextGroupIndex = state.currentGroupIndex
       let nextHalf = state.matchHalf
       let completed = false
+
+      // Exit game when reaching puzzle 18 (first situation of school)
+      if (state.view === 'game4' && nextOverall >= 18) {
+        return {
+          ...state,
+          view: 'game-hub',
+          currentPuzzleIndex: 0,
+          currentGroupIndex: 0,
+          currentGroupQuestionIndex: 0,
+          matchHalf: 1,
+          game4Completed: true,
+          selectedAnswer: null,
+          lastAnswerCorrect: null,
+          showHint: false,
+        }
+      }
 
       if (nextGroupQuestionIndex >= GROUP_QUESTION_COUNT) {
         nextGroupQuestionIndex = 0
@@ -366,32 +459,6 @@ function gameReducer(state: AppState, action: GameAction): AppState {
         ...state,
         showHint: true,
       }
-
-    case 'GO_TO_SOUK': {
-      const newTeams = state.teams.map((team) => ({
-        ...team,
-        coins: Math.floor(team.score / 5),
-      }))
-      return {
-        ...state,
-        view: 'souk',
-        teams: newTeams,
-      }
-    }
-
-    case 'BUY_ITEM': {
-      const { itemId, teamIndex } = action.payload
-      const newTeams = [...state.teams]
-      const cost = shopItemCosts[itemId] || 10
-      if (newTeams[teamIndex]?.coins >= cost && !newTeams[teamIndex]?.accessories.includes(itemId)) {
-        newTeams[teamIndex] = {
-          ...newTeams[teamIndex],
-          coins: newTeams[teamIndex].coins - cost,
-          accessories: [...newTeams[teamIndex].accessories, itemId],
-        }
-      }
-      return { ...state, teams: newTeams }
-    }
 
     case 'SET_MEMORY_DIFFICULTY': {
       const pairCount = Math.floor(action.payload.cardCount / 2)

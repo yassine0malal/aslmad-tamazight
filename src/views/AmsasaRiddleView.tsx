@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useGame } from '@/context/GameContext'
+import WordImage from '@/components/WordImage'
 import { ArrowRight, Check, Clock, X } from 'lucide-react'
 import { choiceLabels } from '@/data/constants'
-import { assetUrl } from '@/lib/utils'
+
+const optionTints = ['#fff7d6', '#e7f8ef', '#eee7ff', '#ffede4']
 
 export default function AmsasaRiddleView() {
   const { state, dispatch } = useGame()
@@ -13,9 +15,9 @@ export default function AmsasaRiddleView() {
   const [timerActive, setTimerActive] = useState(false)
   const [timerExpired, setTimerExpired] = useState(false)
   const [inputLocked, setInputLocked] = useState(false)
-  const [passedOnce, setPassedOnce] = useState(false)
   const [announceMessage, setAnnounceMessage] = useState<string | null>(null)
   const passTimeoutRef = useRef<number | null>(null)
+  const secondsRef = useRef(20)
 
   const challenge = state.game4Deck[state.currentPuzzleIndex]
   const activeTeam = state.teams[state.activeTeamIndex]
@@ -24,9 +26,6 @@ export default function AmsasaRiddleView() {
   const correctOption = challenge?.options.find(
     (option) => option.id === challenge.correctAnswerId,
   )
-  const imageSrc = challenge
-    ? assetUrl(challenge.imageAsset)
-    : ''
 
   const progressPct = useMemo(() => {
     if (totalRounds === 0) return 0
@@ -36,11 +35,11 @@ export default function AmsasaRiddleView() {
   useEffect(() => {
     setSelectedOptionId(null)
     setDisabledOptionIds([])
+    secondsRef.current = 20
     setTimerSeconds(20)
     setTimerActive(false)
     setTimerExpired(false)
     setInputLocked(false)
-    setPassedOnce(false)
     setAnnounceMessage(null)
     if (passTimeoutRef.current !== null) {
       window.clearTimeout(passTimeoutRef.current)
@@ -48,15 +47,36 @@ export default function AmsasaRiddleView() {
     }
   }, [state.currentPuzzleIndex, challenge?.id])
 
-  useEffect(() => {
-    if (!timerActive || timerSeconds <= 0) return
+  /** Time is up and the team did not answer: stop them, hand the turn over and
+   * move on to the next item. */
+  const finishRoundByTimeout = useCallback(() => {
+    setTimerExpired(true)
+    setTimerActive(false)
+    setInputLocked(true)
+    setSelectedOptionId(null)
+    dispatch({ type: 'ANSWER_INCORRECT' })
+    setAnnounceMessage('انتهى الوقت! +0 نقطة. الانتقال إلى السؤال التالي مع الفريق الآخر.')
+    passTimeoutRef.current = window.setTimeout(() => {
+      dispatch({ type: 'SWITCH_TEAM' })
+      dispatch({ type: 'NEXT_PUZZLE' })
+      passTimeoutRef.current = null
+    }, 1600)
+  }, [dispatch])
 
-    const timer = window.setTimeout(() => {
-      setTimerSeconds((current) => Math.max(current - 1, 0))
+  useEffect(() => {
+    if (!timerActive) return
+
+    const interval = window.setInterval(() => {
+      secondsRef.current = Math.max(secondsRef.current - 1, 0)
+      setTimerSeconds(secondsRef.current)
+      if (secondsRef.current === 0) {
+        window.clearInterval(interval)
+        finishRoundByTimeout()
+      }
     }, 1000)
 
-    return () => clearTimeout(timer)
-  }, [timerActive, timerSeconds])
+    return () => clearInterval(interval)
+  }, [timerActive, finishRoundByTimeout])
 
   useEffect(() => {
     return () => {
@@ -66,33 +86,6 @@ export default function AmsasaRiddleView() {
       }
     }
   }, [])
-
-  useEffect(() => {
-    if (timerSeconds !== 0 || !timerActive || timerExpired) return
-
-    setTimerExpired(true)
-    setTimerActive(false)
-    setInputLocked(true)
-    dispatch({ type: 'ANSWER_INCORRECT' })
-    if (!passedOnce) {
-      setPassedOnce(true)
-      setAnnounceMessage('انتهى الوقت! +0 نقطة. تم تمرير السؤال للفريق الآخر.')
-      passTimeoutRef.current = window.setTimeout(() => {
-        dispatch({ type: 'SWITCH_TEAM' })
-        setInputLocked(false)
-        setSelectedOptionId(null)
-        passTimeoutRef.current = null
-      }, 1200)
-      return
-    }
-
-    setAnnounceMessage('انتهى الوقت مرتين. الانتقال إلى السؤال التالي.')
-    passTimeoutRef.current = window.setTimeout(() => {
-      dispatch({ type: 'SWITCH_TEAM' })
-      dispatch({ type: 'NEXT_PUZZLE' })
-      passTimeoutRef.current = null
-    }, 1200)
-  }, [timerSeconds, timerActive, timerExpired, passedOnce, dispatch])
 
   const handleOptionClick = useCallback(
     (optionId: string) => {
@@ -107,6 +100,9 @@ export default function AmsasaRiddleView() {
     if (!challenge || !selectedOptionId || inputLocked || state.lastAnswerCorrect !== null)
       return
 
+    // The team answered in time — stop the clock so it cannot fire afterwards.
+    setTimerActive(false)
+
     const isCorrect = selectedOptionId === challenge.correctAnswerId
     if (isCorrect) {
       setInputLocked(true)
@@ -119,20 +115,11 @@ export default function AmsasaRiddleView() {
       return
     }
 
+    // A wrong choice hands the turn to the next team together with a *new*
+    // question — the next team never gets the question the last team failed.
     setInputLocked(true)
     dispatch({ type: 'ANSWER_INCORRECT' })
-    if (!passedOnce) {
-      setPassedOnce(true)
-      setAnnounceMessage('إجابة غير صحيحة +0 نقطة. تم تمرير السؤال للفريق الآخر.')
-      window.setTimeout(() => {
-        dispatch({ type: 'SWITCH_TEAM' })
-        setInputLocked(false)
-        setSelectedOptionId(null)
-      }, 1100)
-      return
-    }
-
-    setAnnounceMessage('إجابة خاطئة مرة أخرى. الانتقال إلى السؤال التالي.')
+    setAnnounceMessage('إجابة غير صحيحة +0 نقطة. سؤال جديد للفريق الآخر.')
     window.setTimeout(() => {
       dispatch({ type: 'SWITCH_TEAM' })
       dispatch({ type: 'NEXT_PUZZLE' })
@@ -142,7 +129,6 @@ export default function AmsasaRiddleView() {
     dispatch,
     disabledOptionIds.length,
     inputLocked,
-    passedOnce,
     selectedOptionId,
     state.lastAnswerCorrect,
   ])
@@ -167,10 +153,10 @@ export default function AmsasaRiddleView() {
         : 'var(--clay-lavender)'
 
   return (
-    <div className="min-h-screen w-full pb-12">
+    <div className="w-full">
       <div className="max-w-5xl mx-auto">
         {/* Progress bar */}
-        <div className="max-w-3xl mx-auto mb-8">
+        <div className="max-w-3xl mx-auto mb-5">
           <div className="flex items-center justify-between mb-2">
             <span className="clay-caption" style={{ color: 'var(--clay-muted-soft)' }}>
               الجولة {roundNumber} / {totalRounds}
@@ -194,12 +180,12 @@ export default function AmsasaRiddleView() {
         </div>
 
         {/* Title */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
           <div>
-            <h2 className="clay-title-lg mb-1" style={{ color: 'var(--clay-ink)' }}>
-              أمساسا ن توالفت
+            <h2 className="text-3xl sm:text-4xl font-bold mb-1" style={{ color: 'var(--clay-ink)' }}>
+              🎭 أمساسا ن توالفت
             </h2>              <p className="clay-body-md" style={{ color: 'var(--clay-muted)' }}>
-              🖼️ لعبة الصورة والتخمين الجماعي. اختر الاسم الصحيح من بين 4 خيارات.
+              خمّن الكلمة الأمازيغية من معناها ورمزها. اختر الجواب الصحيح من بين 4 خيارات.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -216,7 +202,7 @@ export default function AmsasaRiddleView() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-          {/* Image + Timer */}
+          {/* Clue + Timer */}
           <div>
             <div
               className="clay-card overflow-hidden"
@@ -241,7 +227,9 @@ export default function AmsasaRiddleView() {
                   type="button"
                   onClick={() => {
                     if (!timerActive) {
+                      secondsRef.current = 20
                       setTimerSeconds(20)
+                      setTimerExpired(false)
                       setTimerActive(true)
                     }
                   }}
@@ -255,20 +243,25 @@ export default function AmsasaRiddleView() {
                 </button>
               </div>
 
-              {/* Image */}
+              {/* Emoji clue */}
               <div className="p-6 flex flex-col items-center justify-center gap-5">
                 <div
-                  className="rounded-3xl p-6 shadow-inner w-full"
+                  className="rounded-[32px] p-6 w-full"
                   style={{
-                    background: 'var(--clay-surface-soft)',
-                    border: '1px solid var(--clay-hairline-soft)',
+                    background: 'linear-gradient(160deg, #fff3cf 0%, #ffffff 75%)',
+                    border: '3px solid #ffffff',
+                    boxShadow: '0 12px 28px rgba(61, 44, 20, 0.09)',
                   }}
                 >
-                  <img
-                    src={imageSrc}
-                    alt={correctOption?.meaning ?? 'Amsasa n Twlaft'}
-                    className="h-64 w-full object-contain"
-                  />
+                  <div className="h-60 w-full flex items-center justify-center">
+                    {correctOption && (
+                      <WordImage
+                        emoji={correctOption.emoji}
+                        size={220}
+                        className="animate-kid-bob"
+                      />
+                    )}
+                  </div>
                 </div>
 
                 {/* Timer ring */}
@@ -306,11 +299,18 @@ export default function AmsasaRiddleView() {
                 </div>
 
                 {/* Arabic meaning */}
-                <div className="text-center">
+                <div
+                  className="text-center px-6 py-3"
+                  style={{
+                    background: '#ffffff',
+                    borderRadius: '999px',
+                    boxShadow: '0 8px 18px rgba(61, 44, 20, 0.08)',
+                  }}
+                >
                   <p className="clay-caption" style={{ color: 'var(--clay-muted-soft)' }}>
                     الكلمة العربية
                   </p>
-                  <p className="clay-title-lg mt-2" style={{ color: 'var(--clay-ink)' }}>
+                  <p className="clay-title-lg mt-0.5" style={{ color: 'var(--clay-ink)' }}>
                     {correctOption?.meaning}
                   </p>
                 </div>
@@ -332,38 +332,43 @@ export default function AmsasaRiddleView() {
                   type="button"
                   onClick={() => handleOptionClick(option.id)}
                   disabled={isDisabled || inputLocked || state.lastAnswerCorrect === true}
-                  className="w-full rounded-2xl p-4 text-right transition-all duration-300 flex items-center justify-between gap-4"
+                  className="kid-choice w-full p-4 text-right flex items-center justify-between gap-4"
                   style={{
                     border: showCorrect
-                      ? '2px solid var(--clay-success)'
+                      ? '3px solid var(--clay-success)'
                       : isDisabled
-                        ? '2px solid var(--clay-error)'
+                        ? '3px solid var(--clay-error)'
                         : isSelected
-                          ? '2px solid var(--clay-lavender)'
-                          : '2px solid var(--clay-hairline)',
+                          ? '3px solid var(--clay-lavender)'
+                          : '3px solid #ffffff',
                     background: showCorrect
-                      ? 'var(--clay-surface-soft)'
+                      ? '#eafbf1'
                       : isDisabled
-                        ? 'var(--clay-surface-soft)'
+                        ? '#fff1f1'
                         : isSelected
-                          ? 'var(--clay-canvas)'
-                          : 'white',
+                          ? '#ffffff'
+                          : optionTints[idx % optionTints.length],
                     color: 'var(--clay-ink)',
-                    opacity: isDisabled && !showCorrect ? 0.6 : 1,
+                    opacity: isDisabled && !showCorrect ? 0.65 : 1,
+                    transform: isSelected && !showCorrect ? 'translateY(-3px)' : undefined,
+                    boxShadow: isSelected
+                      ? '0 12px 24px rgba(124, 92, 214, 0.16)'
+                      : '0 6px 16px rgba(61, 44, 20, 0.08)',
                   }}
                 >
                   <div className="flex items-center gap-4">
                     <span
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-lg font-semibold shrink-0"
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-lg font-bold shrink-0"
                       style={{
-                        background: 'var(--clay-surface-soft)',
-                        color: 'var(--clay-ink)',
+                        background: '#ffffff',
+                        color: 'var(--clay-muted)',
+                        boxShadow: '0 4px 10px rgba(61, 44, 20, 0.07)',
                       }}
                     >
                       {choiceLabels[idx]}
                     </span>
                     <div className="text-left">
-                      <p className="tifinagh-text text-3xl font-bold">{option.tifinaghText}</p>
+                      <p className="tifinagh-text text-3xl md:text-4xl font-bold">{option.tifinaghText}</p>
                       <p className="clay-body-sm" style={{ color: 'var(--clay-muted)' }}>
                         {option.phoneticText}
                       </p>
@@ -419,27 +424,23 @@ export default function AmsasaRiddleView() {
                   </p>
                 </div>
               )}
+
+              {/* Check answer — sits under the current-turn panel */}
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!selectedOptionId || inputLocked || state.lastAnswerCorrect === true}
+                className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 font-bold text-white transition-all ${
+                  selectedOptionId && !inputLocked && state.lastAnswerCorrect !== true
+                    ? 'clay-btn-primary'
+                    : 'clay-btn-primary opacity-40 cursor-not-allowed'
+                }`}
+              >
+                {state.lastAnswerCorrect === false ? 'صحح الاختيار' : 'تحقق'}
+                <ArrowRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
-        </div>
-
-        {/* Submit button */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={
-              !selectedOptionId || inputLocked || state.lastAnswerCorrect === true
-            }
-            className={`inline-flex items-center gap-2 rounded-full px-8 py-3.5 font-bold text-white transition-all ${
-              selectedOptionId && !inputLocked && state.lastAnswerCorrect !== true
-                ? 'clay-btn-primary'
-                : 'clay-btn-primary opacity-40 cursor-not-allowed'
-            }`}
-          >
-            {state.lastAnswerCorrect === false ? 'صحح الاختيار' : 'تحقق'}
-            <ArrowRight className="w-5 h-5" />
-          </button>
         </div>
 
         {/* Result feedback */}
@@ -483,8 +484,8 @@ export default function AmsasaRiddleView() {
               <span className="clay-title-sm" style={{ color: 'var(--clay-error)' }}>
                 {announceMessage ??
                   (timerExpired
-                    ? 'انتهى الوقت! +0 نقطة. تم تمرير السؤال للفريق الآخر.'
-                    : 'إجابة غير صحيحة +0 نقطة. تم تمرير السؤال للفريق الآخر.')}
+                    ? 'انتهى الوقت! +0 نقطة. سؤال جديد للفريق الآخر.'
+                    : 'إجابة غير صحيحة +0 نقطة. سؤال جديد للفريق الآخر.')}
               </span>
             </div>
           </div>

@@ -13,6 +13,7 @@ import iconPictureQuiz from '@/assets/icons/teams-games/picture-quiz.png'
 import iconKids from '@/assets/icons/class-games/kids.png'
 import iconCulture from '@/assets/icons/culture/culture.png'
 import iconMarket from '@/assets/icons/market/market.png'
+import iconPronunciation from '@/assets/icons/pronunciation.svg'
 
 /* ─── Shared helpers ─── */
 const iconMap: Record<string, string> = {
@@ -24,6 +25,7 @@ const iconMap: Record<string, string> = {
   'kids': iconKids,
   'culture': iconCulture,
   'market': iconMarket,
+  'pronunciation': iconPronunciation,
 }
 
 export default function GameHubView() {
@@ -59,17 +61,19 @@ export default function GameHubView() {
       icon: 'next-letter',
       accent: 'var(--clay-lavender)',
       accentLight: 'rgba(137, 115, 191, 0.08)',
+      tint: '#efe8ff',
       completed: state.game1Completed,
       count: state.game1Deck.length,
       route: routes.nextLetter,
     },
     {
       id: 'game2',
-      title: 'مباراة الحيوانات',
-      description: 'اختر الحرف الصحيح لاسم الحيوان',
+      title: 'مباراة الكلمات',
+      description: 'ابنِ الكلمة الأمازيغية الصحيحة من الحروف',
       icon: 'animal',
       accent: 'var(--clay-peach)',
       accentLight: 'rgba(220, 140, 110, 0.08)',
+      tint: '#ffe9df',
       completed: state.game2Completed,
       count: state.game2Deck.length,
       route: routes.animalMatch,
@@ -81,6 +85,7 @@ export default function GameHubView() {
       icon: 'mind',
       accent: 'var(--clay-ochre)',
       accentLight: 'rgba(196, 149, 48, 0.08)',
+      tint: '#fff2c9',
       completed: false,
       count: state.memoryDeck.length || 12,
       route: routes.memory,
@@ -92,6 +97,7 @@ export default function GameHubView() {
       icon: 'picture-quiz',
       accent: 'var(--clay-coral)',
       accentLight: 'rgba(211, 91, 91, 0.08)',
+      tint: '#ffe3df',
       completed: state.game4Completed,
       count: state.game4Deck.length,
       route: routes.riddle,
@@ -105,6 +111,7 @@ export default function GameHubView() {
       icon: 'kids',
       accent: 'var(--clay-ochre)',
       accentLight: 'rgba(196, 149, 48, 0.08)',
+      tint: '#fff2c9',
       route: routes.colors,
     },
   ]
@@ -116,15 +123,17 @@ export default function GameHubView() {
       icon: 'culture',
       accent: 'var(--clay-lavender)',
       accentLight: 'rgba(137, 115, 191, 0.08)',
+      tint: '#efe8ff',
       route: routes.culture,
     },
     {
-      title: 'السوق الافتراضي',
-      description: 'أنفق نقاطك واشتري هدايا رائعة',
-      icon: 'market',
+      title: 'النطق والاستماع',
+      description: 'استمع إلى الكلمات وردّدها بصوت واضح',
+      icon: 'pronunciation',
       accent: 'var(--clay-peach)',
       accentLight: 'rgba(220, 140, 110, 0.08)',
-      route: routes.souk,
+      tint: '#ffe9df',
+      route: routes.pronunciation,
     },
   ]
 
@@ -172,31 +181,62 @@ export default function GameHubView() {
         {/* ═══════════════════════════════════════════════════
             HERO HEADER
            ═══════════════════════════════════════════════════ */}
-        <FadeIn delay={0} className="text-center pt-8 pb-2">
+        <FadeIn delay={0} className="text-center pt-6 pb-2 relative">
+          <span
+            className="hidden sm:block absolute left-[4%] top-2 tifinagh-text text-5xl animate-kid-bob select-none"
+            style={{ color: 'var(--clay-lavender)', opacity: 0.55 }}
+            aria-hidden
+          >
+            ⴰ
+          </span>
+          <span
+            className="hidden sm:block absolute right-[6%] top-8 tifinagh-text text-4xl animate-kid-bob select-none"
+            style={{ color: 'var(--clay-peach)', opacity: 0.7, animationDelay: '0.8s' }}
+            aria-hidden
+          >
+            ⵣ
+          </span>
+          <span
+            className="hidden md:block absolute right-[18%] top-0 tifinagh-text text-3xl animate-kid-bob select-none"
+            style={{ color: 'var(--clay-mint)', opacity: 0.8, animationDelay: '1.4s' }}
+            aria-hidden
+          >
+            ⵜ
+          </span>
+
           <div
-            className="inline-flex items-center gap-2 px-5 py-2 mb-5"
+            className="inline-flex items-center gap-2 px-5 py-2.5 mb-6"
             style={{
-              background: 'var(--clay-surface-card)',
-              border: '1px solid var(--clay-hairline)',
+              background: '#ffffff',
+              border: '2px solid #ffffff',
               borderRadius: '999px',
+              boxShadow: '0 8px 20px rgba(61, 44, 20, 0.08)',
             }}
           >
-            <img src={iconAll} alt="" className="w-5 h-5 object-contain" />
-            <span className="clay-caption font-semibold" style={{ color: 'var(--clay-muted-soft)' }}>
+            <span className="clay-caption font-bold" style={{ color: 'var(--clay-lavender)' }}>
               مركز الألعاب
             </span>
+            <img src={iconAll} alt="" className="w-5 h-5 object-contain" />
           </div>
 
           <h1
-            className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-3"
+            className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-4"
             style={{ color: 'var(--clay-ink)' }}
           >
             🎮 اختر{' '}
-            <span style={{ color: 'var(--clay-ochre)' }}>لعبتك</span>
+            <span className="relative inline-block">
+              <span className="relative z-10">لعبتك</span>
+              <span
+                className="absolute left-0 right-0 bottom-1 h-4 -z-0 rounded-full"
+                style={{ background: 'var(--clay-ochre)', opacity: 0.4 }}
+                aria-hidden
+              />
+            </span>
           </h1>
           <p className="clay-body-md max-w-xl mx-auto" style={{ color: 'var(--clay-muted)' }}>
-            كل فريق يتناوب على الإجابة — من يجمع أكبر عدد من النقاط يفوز!
+            هيا نلعب ونتعلّم معًا! كل فريق يتناوب على الإجابة — ومن يجمع أكبر عدد من النقاط يفوز
           </p>
+          
         </FadeIn>
 
         {/* ═══════════════════════════════════════════════════
@@ -225,91 +265,100 @@ export default function GameHubView() {
           {teamGames.map((game, idx) => (
             <FadeIn key={game.id} delay={200 + idx * 80}>
               <div
-                className="group relative overflow-hidden cursor-pointer transition-all duration-400 hover:-translate-y-1.5"
+                className="group relative overflow-hidden cursor-pointer kid-card-hover"
                 style={{
-                  background: 'var(--clay-surface-card)',
-                  border: '1px solid var(--clay-hairline)',
-                  borderRadius: '16px',
-                  boxShadow: visible ? '0 1px 3px rgba(0,0,0,0.04)' : 'none',
+                  background: `linear-gradient(155deg, ${game.tint} 0%, #fffdf8 78%)`,
+                  border: '3px solid #ffffff',
+                  borderRadius: '28px',
+                  boxShadow: visible ? '0 10px 24px rgba(61, 44, 20, 0.08)' : 'none',
                 }}
                 onClick={() => handleGameClick(game.id)}
               >
-                {/* Hover gradient overlay */}
+                {/* Scalloped ribbon + sparkle accent */}
                 <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none"
+                  className="absolute top-0 left-0 right-0 h-3 pointer-events-none"
+                  aria-hidden
                   style={{
-                    background: `linear-gradient(135deg, ${game.accentLight}, transparent 60%)`,
+                    backgroundImage: `radial-gradient(circle at 10px -2px, ${game.accent} 9px, transparent 9.5px)`,
+                    backgroundSize: '20px 12px',
+                    backgroundRepeat: 'repeat-x',
+                    opacity: 0.55,
                   }}
                 />
+                <span
+                  className="absolute top-4 left-5 text-lg animate-kid-twinkle pointer-events-none select-none"
+                  style={{ color: game.accent, opacity: 0.55 }}
+                  aria-hidden
+                >
+                  ✦
+                </span>
 
-                <div className="relative z-10 p-5 flex items-start gap-4">
+                <div className="relative z-10 p-6 pt-7 flex items-center gap-5">
                   {/* Icon */}
                   <div
-                    className="w-16 h-16 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"
+                    className="w-20 h-20 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
                     style={{
-                      background: game.accentLight,
-                      borderRadius: '14px',
-                      border: `1px solid ${game.accent}20`,
+                      background: '#ffffff',
+                      borderRadius: '24px',
+                      boxShadow: '0 8px 18px rgba(61, 44, 20, 0.1)',
                     }}
                   >
                     <img
                       src={iconMap[game.icon]}
                       alt={game.title}
-                      className="w-9 h-9 object-contain"
+                      className="w-12 h-12 object-contain"
                     />
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <h3
-                      className="text-base font-bold mb-1 flex items-center gap-2"
+                      className="text-lg sm:text-xl font-bold mb-1 flex items-center gap-2"
                       style={{ color: 'var(--clay-ink)' }}
                     >
                       {game.title}
                       {game.completed && (
-                        <span className="text-xs" style={{ color: 'var(--clay-success)' }}>
+                        <span className="text-sm" style={{ color: 'var(--clay-success)' }}>
                           ✅
                         </span>
                       )}
                     </h3>
-                    <p className="clay-body-sm mb-3" style={{ color: 'var(--clay-muted)' }}>
+                    <p className="clay-body-sm mb-3" style={{ color: 'var(--clay-body)' }}>
                       {game.description}
                     </p>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-3">
                       <span
-                        className="clay-caption px-2.5 py-1"
+                        className="clay-caption font-bold px-3 py-1.5"
                         style={{
-                          background: game.completed
-                            ? 'var(--clay-surface-soft)'
-                            : game.accentLight,
+                          background: '#ffffff',
                           color: game.completed ? 'var(--clay-success)' : game.accent,
-                          borderRadius: '6px',
+                          borderRadius: '999px',
+                          boxShadow: '0 4px 10px rgba(61, 44, 20, 0.06)',
                         }}
                       >
                         {game.completed ? '✅ مكتمل' : `🎯 ${game.count} سؤال`}
                       </span>
-                      <ArrowRight
-                        className="w-4 h-4 transition-all duration-300 group-hover:translate-x-1"
+                      <div
+                        className="w-10 h-10 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1"
                         style={{
-                          color: game.completed ? 'var(--clay-muted-soft)' : game.accent,
+                          background: '#ffffff',
+                          color: game.accent,
+                          borderRadius: '999px',
+                          boxShadow: '0 4px 10px rgba(61, 44, 20, 0.08)',
                         }}
-                      />
+                      >
+                        <ArrowRight className="w-5 h-5" />
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Bottom accent line */}
-                <div
-                  className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-400"
-                  style={{ background: game.accent }}
-                />
               </div>
             </FadeIn>
           ))}
         </div>
 
         {/* ═══════════════════════════════════════════════════
-            KIDS GAMES + CULTURE + SOUK — compact row
+            KIDS GAMES + CULTURE + PRONUNCIATION — compact row
            ═══════════════════════════════════════════════════ */}
         <FadeIn delay={550}>
           <div className="flex items-center gap-3 mb-5 mt-2">
@@ -335,103 +384,95 @@ export default function GameHubView() {
           {kidsGames.map((game, idx) => (
             <FadeIn key={game.route} delay={600 + idx * 60}>
               <div
-                className="group relative overflow-hidden cursor-pointer transition-all duration-400 hover:-translate-y-1.5"
+                className="group relative overflow-hidden cursor-pointer kid-card-hover"
                 style={{
-                  background: 'var(--clay-surface-card)',
-                  border: '1px solid var(--clay-hairline)',
-                  borderRadius: '14px',
+                  background: `linear-gradient(155deg, ${game.tint} 0%, #fffdf8 80%)`,
+                  border: '3px solid #ffffff',
+                  borderRadius: '24px',
+                  boxShadow: '0 8px 20px rgba(61, 44, 20, 0.07)',
                 }}
                 onClick={() => directNavigate(game.route)}
               >
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none"
-                  style={{
-                    background: `linear-gradient(135deg, ${game.accentLight}, transparent 60%)`,
-                  }}
-                />
-
-                <div className="relative z-10 p-4 flex items-center gap-4">
+                <div className="relative z-10 p-5 flex items-center gap-4">
                   <div
-                    className="w-14 h-14 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"
+                    className="w-16 h-16 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
                     style={{
-                      background: game.accentLight,
-                      borderRadius: '12px',
-                      border: `1px solid ${game.accent}20`,
+                      background: '#ffffff',
+                      borderRadius: '20px',
+                      boxShadow: '0 6px 14px rgba(61, 44, 20, 0.08)',
                     }}
                   >
                     <img
                       src={iconMap[game.icon]}
                       alt={game.title}
-                      className="w-8 h-8 object-contain"
+                      className="w-10 h-10 object-contain"
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold mb-0.5" style={{ color: 'var(--clay-ink)' }}>
+                    <h3 className="text-base font-bold mb-0.5" style={{ color: 'var(--clay-ink)' }}>
                       {game.title}
                     </h3>
-                    <p className="clay-caption mb-0" style={{ color: 'var(--clay-muted)' }}>
+                    <p className="clay-caption mb-0" style={{ color: 'var(--clay-body)' }}>
                       {game.description}
                     </p>
                   </div>
 
-                  <ArrowRight
-                    className="w-4 h-4 shrink-0 transition-all duration-300 group-hover:translate-x-1"
-                    style={{ color: 'var(--clay-muted-soft)' }}
-                  />
+                  <div
+                    className="w-9 h-9 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:translate-x-1"
+                    style={{ background: '#ffffff', color: game.accent, borderRadius: '999px' }}
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
                 </div>
               </div>
             </FadeIn>
           ))}
 
-          {/* Culture + Souk */}
+          {/* Culture + Pronunciation */}
           {exploreLinks.map((link, idx) => (
             <FadeIn key={link.route} delay={660 + idx * 60}>
               <div
-                className="group relative overflow-hidden cursor-pointer transition-all duration-400 hover:-translate-y-1.5"
+                className="group relative overflow-hidden cursor-pointer kid-card-hover"
                 style={{
-                  background: 'var(--clay-surface-card)',
-                  border: '1px solid var(--clay-hairline)',
-                  borderRadius: '14px',
+                  background: `linear-gradient(155deg, ${link.tint} 0%, #fffdf8 80%)`,
+                  border: '3px solid #ffffff',
+                  borderRadius: '24px',
+                  boxShadow: '0 8px 20px rgba(61, 44, 20, 0.07)',
                 }}
                 onClick={() => directNavigate(link.route)}
               >
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none"
-                  style={{
-                    background: `linear-gradient(135deg, ${link.accentLight}, transparent 60%)`,
-                  }}
-                />
-
-                <div className="relative z-10 p-4 flex items-center gap-4">
+                <div className="relative z-10 p-5 flex items-center gap-4">
                   <div
-                    className="w-14 h-14 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"
+                    className="w-16 h-16 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
                     style={{
-                      background: link.accentLight,
-                      borderRadius: '12px',
-                      border: `1px solid ${link.accent}20`,
+                      background: '#ffffff',
+                      borderRadius: '20px',
+                      boxShadow: '0 6px 14px rgba(61, 44, 20, 0.08)',
                     }}
                   >
                     <img
                       src={iconMap[link.icon]}
                       alt={link.title}
-                      className="w-8 h-8 object-contain"
+                      className="w-10 h-10 object-contain"
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold mb-0.5" style={{ color: 'var(--clay-ink)' }}>
+                    <h3 className="text-base font-bold mb-0.5" style={{ color: 'var(--clay-ink)' }}>
                       {link.title}
                     </h3>
-                    <p className="clay-caption mb-0" style={{ color: 'var(--clay-muted)' }}>
+                    <p className="clay-caption mb-0" style={{ color: 'var(--clay-body)' }}>
                       {link.description}
                     </p>
                   </div>
 
-                  <ArrowRight
-                    className="w-4 h-4 shrink-0 transition-all duration-300 group-hover:translate-x-1"
-                    style={{ color: 'var(--clay-muted-soft)' }}
-                  />
+                  <div
+                    className="w-9 h-9 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:translate-x-1"
+                    style={{ background: '#ffffff', color: link.accent, borderRadius: '999px' }}
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
                 </div>
               </div>
             </FadeIn>

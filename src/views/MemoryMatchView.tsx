@@ -1,11 +1,18 @@
 import { useEffect, useState, useRef } from 'react'
 import { useGame } from '@/context/GameContext'
+import WordImage from '@/components/WordImage'
 import { useNavigate } from 'react-router'
 import { ArrowLeft, Sparkles, Brain, Trophy, Eye, Clock } from 'lucide-react'
 import { routes } from '@/lib/routes'
 import { MEMORY_DIFFICULTY } from '@/data/constants'
 import type { MemoryDifficultyLevel } from '@/data/constants'
 import { teamImages } from '@/assets/images/teams'
+
+const levelTints: Record<string, string> = {
+  BEGINNER: '#e7f8ef',
+  MEDIUM: '#fff3cf',
+  ADVANCED: '#eee7ff',
+}
 
 export default function MemoryMatchView() {
   const { state, dispatch } = useGame()
@@ -19,9 +26,7 @@ export default function MemoryMatchView() {
     name: 'الفريق 1',
     score: 0,
     avatar: teamImages['atlas-lions'],
-    coins: 0,
     color: '#1A54F4',
-    accessories: [],
   }
 
   // ─── Preview phase: show all cards briefly when game starts ───
@@ -100,11 +105,11 @@ export default function MemoryMatchView() {
     return 'grid-cols-5 sm:grid-cols-6'
   }
 
-  const getCardImageSize = () => {
-    if (cardCount <= 10) return 'h-14 w-14 md:h-20 md:w-20'
-    if (cardCount <= 16) return 'h-12 w-12 md:h-16 md:w-16'
-    if (cardCount <= 20) return 'h-10 w-10 md:h-14 md:w-14'
-    return 'h-8 w-8 md:h-10 md:w-10'
+  const getCardEmojiSize = () => {
+    if (cardCount <= 10) return 72
+    if (cardCount <= 16) return 56
+    if (cardCount <= 20) return 44
+    return 34
   }
 
   const getCardLabelSize = () => {
@@ -129,9 +134,9 @@ export default function MemoryMatchView() {
   }
 
   const getCardRadius = () => {
-    if (cardCount <= 10) return '16px'
-    if (cardCount <= 16) return '14px'
-    return '10px'
+    if (cardCount <= 10) return '22px'
+    if (cardCount <= 16) return '18px'
+    return '14px'
   }
 
   const getCardPadding = () => {
@@ -143,9 +148,9 @@ export default function MemoryMatchView() {
   // If no difficulty selected yet, show the difficulty picker
   if (!state.memoryDifficulty) {
     return (
-      <div className="min-h-screen w-full pb-12 flex items-center justify-center">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="text-center mb-10">
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="w-full max-w-6xl mx-auto px-4">
+          <div className="text-center mb-6">
             <div
               className="w-20 h-20 mx-auto mb-6 flex items-center justify-center"
               style={{
@@ -163,49 +168,45 @@ export default function MemoryMatchView() {
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-3 max-w-5xl mx-auto">
             {(Object.entries(MEMORY_DIFFICULTY) as [MemoryDifficultyLevel, typeof MEMORY_DIFFICULTY[MemoryDifficultyLevel]][]).map(([level, config]) => (
               <button
                 key={level}
                 onClick={() => handleDifficultySelect(level)}
-                className="group relative overflow-hidden transition-all duration-300 hover:shadow-clay-hover active:scale-[0.98]"
+                className="group relative overflow-hidden kid-card-hover"
                 style={{
-                  borderRadius: '24px',
-                  border: '1px solid var(--clay-hairline)',
-                  background: 'var(--clay-canvas)',
+                  borderRadius: '28px',
+                  border: '3px solid #ffffff',
+                  background: `linear-gradient(165deg, ${levelTints[level]} 0%, #fffdf8 82%)`,
+                  boxShadow: '0 10px 24px rgba(61, 44, 20, 0.08)',
                 }}
               >
-                <div
-                  className="h-2 w-full"
-                  style={{
-                    background:
-                      level === 'BEGINNER'
-                        ? 'var(--clay-mint)'
-                        : level === 'MEDIUM'
-                          ? 'var(--clay-ochre)'
-                          : 'var(--clay-lavender)',
-                  }}
-                />
-                <div className="p-6 text-center">
-                  <span className="text-5xl block mb-4">{config.emoji}</span>
+                <div className="p-7 sm:p-8 text-center">
+                  <span
+                    className="w-20 h-20 mx-auto mb-4 flex items-center justify-center text-5xl rounded-full bg-white transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
+                    style={{ boxShadow: '0 8px 18px rgba(61, 44, 20, 0.09)' }}
+                    aria-hidden
+                  >
+                    {config.emoji}
+                  </span>
                   <h3
-                    className="clay-title-md mb-2"
+                    className="text-xl font-bold mb-2"
                     style={{ color: 'var(--clay-ink)' }}
                   >
                     {config.label}
                   </h3>
-                  <p className="clay-body-sm" style={{ color: 'var(--clay-muted)' }}>
+                  <p className="clay-body-sm" style={{ color: 'var(--clay-body)' }}>
                     {config.description}
                   </p>
                   <div
-                    className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-all group-hover:bg-clay-ink group-hover:text-white"
+                    className="mt-5 inline-flex items-center gap-2 px-6 py-3 text-base font-extrabold text-white transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:scale-[1.03]"
                     style={{
-                      borderRadius: '9999px',
-                      background: 'var(--clay-surface-soft)',
-                      color: 'var(--clay-ink)',
+                      borderRadius: '20px',
+                      background: 'linear-gradient(135deg,#ffb36b,#ff7a59)',
+                      boxShadow: '0 6px 0 #e0683a',
                     }}
                   >
-                    <Trophy className="w-4 h-4" />
+                    <Trophy className="w-5 h-5" />
                     ابدأ اللعبة
                   </div>
                 </div>
@@ -231,7 +232,7 @@ export default function MemoryMatchView() {
   }
 
   return (
-    <div className="min-h-screen w-full pb-12">
+    <div className="w-full">
       <div className="max-w-6xl mx-auto px-2 md:px-4">
         {/* ─── Preview Banner ─── */}
         {previewActive && (
@@ -348,14 +349,14 @@ export default function MemoryMatchView() {
             style={{
               borderRadius: '9999px',
               width: cardCount > 0 ? `${(matchedCount / cardCount) * 100}%` : '0%',
-              background: 'var(--clay-mint)',
+              background: 'linear-gradient(to right, var(--clay-mint), var(--clay-ochre))',
             }}
           />
         </div>
 
         {/* Game grid */}
         <div className={`grid ${getGridGap()} mb-4 ${getGridCols()}`}>
-          {state.memoryDeck.map((card, index) => {
+          {state.memoryDeck.map((card) => {
             const isSelected = state.memorySelection.includes(card.id)
             const showFace = card.isFlipped || card.isMatched
             return (
@@ -374,31 +375,39 @@ export default function MemoryMatchView() {
                 style={{
                   borderRadius: getCardRadius(),
                   border: previewActive
-                    ? '2px solid #e8b94a'
+                    ? '3px solid #e8b94a'
                     : card.isMatched
                       ? '3px solid var(--clay-success)'
                       : isSelected
                         ? '3px solid var(--clay-lavender)'
-                        : '2px solid var(--clay-hairline)',
+                        : '3px solid #ffffff',
                   background: previewActive
                     ? '#ffffff'
                     : card.isMatched
-                      ? 'var(--clay-surface-soft)'
+                      ? '#eafbf1'
                       : isSelected
-                        ? 'white'
-                        : 'var(--clay-canvas)',
+                        ? '#ffffff'
+                        : showFace
+                          ? 'linear-gradient(160deg, #ffffff 0%, #fff7dd 100%)'
+                          : 'linear-gradient(145deg, #c4b1f3 0%, #8f78d2 100%)',
                   boxShadow: previewActive
-                    ? '0 4px 20px rgba(232, 185, 74, 0.3)'
-                    : 'none',
+                    ? '0 8px 24px rgba(232, 185, 74, 0.32)'
+                    : card.isMatched
+                      ? '0 0 0 4px rgba(34, 197, 94, 0.1), 0 8px 18px rgba(61, 44, 20, 0.08)'
+                      : isSelected
+                        ? '0 0 0 4px rgba(184, 164, 237, 0.16), 0 10px 20px rgba(61, 44, 20, 0.1)'
+                        : showFace
+                          ? '0 8px 18px rgba(61, 44, 20, 0.08)'
+                          : '0 10px 20px rgba(90, 70, 140, 0.22)',
                 }}
               >
                 <div className={`absolute inset-0 flex flex-col items-center justify-center text-center ${getCardPadding()}`}>
                   {(showFace || previewActive) ? (
                     <>
-                      <img
-                        src={card.image}
-                        alt={card.label}
-                        className={`${getCardImageSize()} object-contain mb-2`}
+                      <WordImage
+                        emoji={card.emoji}
+                        size={getCardEmojiSize()}
+                        className="mb-2"
                       />
                               {cardCount <= 20 && (
                         <div
@@ -413,15 +422,15 @@ export default function MemoryMatchView() {
                     <>
                       <div
                         className={`${getCardBackSize()} font-bold`}
-                        style={{ color: 'var(--clay-muted-soft)' }}
+                        style={{ color: 'rgba(255,255,255,0.92)' }}
                       >
-                        {index + 1}
+                        ⵣ
                       </div>
                       <div
-                        className="text-xs mt-1 leading-tight"
-                        style={{ color: 'var(--clay-muted)' }}
+                        className="text-[10px] md:text-xs mt-1 leading-tight font-semibold"
+                        style={{ color: 'rgba(255,255,255,0.8)' }}
                       >
-                        اختر
+                        اقلب البطاقة
                       </div>
                     </>
                   )}

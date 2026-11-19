@@ -14,6 +14,7 @@ import iconMind from '@/assets/icons/teams-games/mind.png'
 import iconPictureQuiz from '@/assets/icons/teams-games/picture-quiz.png'
 import iconKids from '@/assets/icons/class-games/kids.png'
 import iconMarket from '@/assets/icons/market/market.png'
+import iconPronunciation from '@/assets/icons/pronunciation.svg'
 import iconCulture from '@/assets/icons/culture.png'
 
 const iconMap: Record<string, string> = {
@@ -25,6 +26,7 @@ const iconMap: Record<string, string> = {
   'picture-quiz': iconPictureQuiz,
   'kids': iconKids,
   'market': iconMarket,
+  'pronunciation': iconPronunciation,
   'culture': iconCulture,
 }
 

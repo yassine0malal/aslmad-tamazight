@@ -41,20 +41,6 @@ export function createTeamConfig(index: number) {
   }
 }
 
-// ─── Souk View ────────────────────────────────────────────────
-
-export const categoryColors: Record<string, string> = {
-  background: 'var(--clay-lavender)',
-  accessory: 'var(--clay-coral)',
-  emote: 'var(--clay-mint)',
-}
-
-export const categoryLabels: Record<string, string> = {
-  background: 'خلفية',
-  accessory: 'إكسسوار',
-  emote: 'إيموت',
-}
-
 // ─── Riddle View ──────────────────────────────────────────────
 
 export const choiceLabels = ['أ', 'ب', 'ت', 'ث'] as const

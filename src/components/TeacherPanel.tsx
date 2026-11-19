@@ -13,11 +13,7 @@ export default function TeacherPanel() {
   const isGame2 = location.pathname === routes.animalMatch
 
   const activeTeam = state.teams[state.activeTeamIndex]
-  const currentPuzzle = isGame1
-    ? state.game1Deck[state.currentPuzzleIndex]
-    : isGame2
-      ? state.game2Deck[state.currentPuzzleIndex]
-      : null
+  const currentPuzzle = isGame1 ? state.game1Deck[state.currentPuzzleIndex] : null
   const groupLabel = `مجموعة ${state.currentGroupIndex + 1} من ${state.groupCount}`
   const halfLabel = state.matchHalf === 1 ? 'الشوط الأول' : 'الشوط الثاني'
 
@@ -149,16 +145,16 @@ export default function TeacherPanel() {
         </div>
       </div>
 
-      {(isGame1 || isGame2) && currentPuzzle && (
+      {isGame1 && currentPuzzle && (
         <div className="p-6">
           <h4
             className="clay-caption-uppercase mb-4"
             style={{ color: 'var(--clay-muted)', letterSpacing: '1.5px' }}
           >
-            {isGame1 ? 'الحروف المتاحة' : 'اختر الحرف'}
+            الحروف المتاحة
           </h4>
 
-          <div className={`grid gap-3 ${isGame1 ? 'grid-cols-2' : 'grid-cols-4'}`}>
+          <div className="grid gap-3 grid-cols-2">
             {currentPuzzle.options.map((option, idx) => (
               <button
                 key={idx}
@@ -179,7 +175,7 @@ export default function TeacherPanel() {
                     state.selectedAnswer === option
                       ? 'var(--clay-surface-soft)'
                       : 'white',
-                  minHeight: isGame1 ? 100 : 80,
+                  minHeight: 100,
                 }}
               >
                 <span

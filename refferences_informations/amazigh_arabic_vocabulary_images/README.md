@@ -1,0 +1,35 @@
+# Amazigh & Arabic Vocabulary Images
+
+- `01_student_anlmad.png` — **Student** | Amazigh: `ⴰⵏⵍⵎⴰⴷ` | Arabic: `التلميذ`
+- `02_desk_asira.png` — **Desk / Office** | Amazigh: `ⴰⵙⵉⵔⴰ` | Arabic: `المكتب`
+- `03_classroom_tadala.png` — **Classroom** | Amazigh: `ⵜⴰⴷⴰⵍⴰ` | Arabic: `القسم`
+- `04_female_teacher_taslmadt.png` — **Female Teacher** | Amazigh: `ⵜⴰⵙⵍⵎⴰⴷⵜ` | Arabic: `الاستاذة`
+- `05_male_teacher_aslmad.png` — **Male Teacher** | Amazigh: `ⴰⵙⵍⵎⴰⴷ` | Arabic: `الاستاذ`
+- `06_school_tinml.png` — **School** | Amazigh: `ⵜⵉⵏⵎⵍ` | Arabic: `المدرسة`
+- `07_eyes_tittawin.png` — **Eyes** | Amazigh: `ⵜⵉⵟⵟⴰⵡⵉⵏ` | Arabic: `عيون`
+- `08_finger_adad.png` — **Finger** | Amazigh: `ⴰⴹⴰⴹ` | Arabic: `اصبع`
+- `09_book_adlis.png` — **Book** | Amazigh: `ⴰⴷⵍⵉⵙ` | Arabic: `كتاب`
+- `10_notebook_alug.png` — **Notebook** | Amazigh: `ⴰⵍⵓⴳ` | Arabic: `دفتر`
+- `11_workbook_tadlist.png` — **Workbook** | Amazigh: `ⵜⴰⴷⵍⵉⵙⵜ` | Arabic: `كراسة`
+- `12_chalk_angmirs.png` — **Chalk** | Amazigh: `ⴰⵏⴳⵎⵉⵔⵙ` | Arabic: `طبشور`
+- `13_table_tadabut.png` — **Table** | Amazigh: `ⵜⴰⴷⴰⴱⵓⵜ` | Arabic: `طاولة`
+- `14_page_tasna.png` — **Page** | Amazigh: `ⵜⴰⵙⵏⴰ` | Arabic: `صفحة`
+- `15_yellow_awragh.png` — **Yellow** | Amazigh: `ⴰⵡⵔⴰⵖ` | Arabic: `اصفر`
+- `16_red_azggwagh.png` — **Red** | Amazigh: `ⴰⵣⴳⴳⵯⴰⵖ` | Arabic: `احمر`
+- `17_green_azgzaw.png` — **Green** | Amazigh: `ⴰⵣⴳⵣⴰⵡ` | Arabic: `اخضر`
+- `18_black_abrkan.png` — **Black** | Amazigh: `ⴰⴱⵔⴽⴰⵏ` | Arabic: `اسود`
+- `19_white_amllal.png` — **White** | Amazigh: `ⴰⵎⵍⵍⴰⵍ` | Arabic: `ابيض`
+- `20_blue_azrwal.png` — **Blue** | Amazigh: `ⴰⵥⵕⵡⴰⵍ` | Arabic: `ازرق`
+- `21_drawing_tafrist.png` — **Drawing / Art** | Amazigh: `ⵜⴰⴼⵔⵉⵙⵜ` | Arabic: `رسم`
+- `22_colors_ikwlan.png` — **Colors** | Amazigh: `ⵉⴽⵯⵍⴰⵏ` | Arabic: `ألالوان`
+- `23_theater_amzgun.png` — **Theater** | Amazigh: `ⴰⵎⵣⴳⵓⵏ` | Arabic: `مسرح`
+- `24_mathematics_tusnakt.png` — **Mathematics** | Amazigh: `ⵜⵓⵙⵏⴰⴽⵜ` | Arabic: `رياضيات`
+- `25_science_timassanin.png` — **Science** | Amazigh: `ⵜⵉⵎⴰⵙⵙⴰⵏⵉⵏ` | Arabic: `علوم`
+- `26_sports_tunnunt.png` — **Sports** | Amazigh: `ⵜⵓⵏⵏⵓⵏⵜ` | Arabic: `رياضة`
+- `27_cold_asmmid.png` — **Cold** | Amazigh: `ⴰⵚⵎⵎⵉⴹ` | Arabic: `البرد`
+- `28_man_argaz.png` — **Man** | Amazigh: `ⴰⵔⴳⴰⵣ` | Arabic: `رجل`
+- `29_winter_anzar.png` — **Winter / Rain** | Amazigh: `ⴰⵏⵥⴰⵕ` | Arabic: `شتاء`
+- `30_song_tizlit.png` — **Song / Chant** | Amazigh: `ⵜⵉⵣⵍⵉⵜ` | Arabic: `أنشودة`
+- `31_nose_tinzar.png` — **Nose** | Amazigh: `ⵜⵉⵏⵣⴰⵔ` | Arabic: `أنف`
+- `32_board_tifilt.png` — **Board / Painting** | Amazigh: `ⵜⵉⴼⵉⵍⵜ` | Arabic: `لوحة`
+- `33_blackboard_tiflwit.png` — **Blackboard** | Amazigh: `ⵜⵉⴼⵍⵡⵉⵜ` | Arabic: `السبورة`

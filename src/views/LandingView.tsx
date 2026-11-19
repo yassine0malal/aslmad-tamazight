@@ -63,12 +63,12 @@ const pathways: PathwayBlock[] = [
   },
   {
     id: 'p2',
-    title: 'مباراة الحيوانات',
-    subtitle: 'ⴰⵎⵓⵔⴰⵔ ⵏ ⵉⵎⵓⴷⴰⵔ',
-    body: 'تعلّم أسماء الحيوانات باللغة الأمازيغية من خلال لعبة المطابقة الممتعة. اختر الحرف الصحيح لكل حيوان وكنز معلوماتك.',
+    title: 'مباراة الكلمات',
+    subtitle: 'ⴰⵎⵓⵔⴰⵔ ⵏ ⵜⴳⵓⵔⵉⵡⵉⵏ',
+    body: 'تعلّم كلمات اللغة الأمازيغية من خلال لعبة بناء الكلمات. اختر الحروف الصحيحة لتكوين الكلمة التي يظهر معناها.',
     image: imgHomeHero,
-    alt: 'لعبة مباراة الحيوانات',
-    features: ['رسومات حيوانات جميلة', 'نطق صحيح للأسماء', 'مجموعة واسعة من الحيوانات'],
+    alt: 'لعبة مباراة الكلمات',
+    features: ['كلمات من الدروس الرسمية', 'نطق صحيح للكلمات', 'تدريب على كتابة تيفيناغ'],
   },
   {
     id: 'p3',
@@ -237,7 +237,7 @@ function PeopleIcon({ className }: { className?: string }) {
 const stats = [
   {
     icon: DiceIcon,
-    target: 24,
+    target: 5,
     suffix: '+',
     label: 'لعبة تعليمية',
     desc: 'تفاعلية وممتعة',
@@ -245,7 +245,7 @@ const stats = [
   },
   {
     icon: ChildrenIcon,
-    target: 1000,
+    target: 100,
     suffix: '+',
     label: 'طفل مستفيد',
     desc: 'في رحلة التعلم',
@@ -253,7 +253,7 @@ const stats = [
   },
   {
     icon: StarIcon,
-    target: 50,
+    target: 8,
     suffix: '+',
     label: 'نشاط ثقافي',
     desc: 'يكتشفون التراث',
@@ -261,7 +261,7 @@ const stats = [
   },
   {
     icon: PeopleIcon,
-    target: 15,
+    target: 2,
     suffix: '',
     label: 'مربي ومعلم',
     desc: 'يساهمون في المحتوى',
@@ -482,7 +482,7 @@ function HeroSection() {
       className="relative overflow-hidden flex items-center "
       style={{
         minHeight: '700px',
-        marginTop:"30px"
+        marginTop: "30px"
       }}
     >
       {/* Background fade */}
@@ -599,8 +599,7 @@ function HeroSection() {
                 animate={loaded ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.55 }}
               >
-                شاهد آراء المستخدمين
-              </motion.button>
+                اكتشف ثقافتنا              </motion.button>
             </motion.div>
 
             {/* Stats */}
@@ -749,13 +748,13 @@ function HeroSection() {
           >
             {/* Left wing */}
             <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-              <path d="M8 0 L0 4 L8 8" stroke="#c49530" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M8 0 L0 4 L8 8" stroke="#c49530" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {/* Center bar */}
             <div style={{ width: '60px', height: '3px', background: '#c49530' }} />
             {/* Right wing */}
             <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-              <path d="M0 0 L8 4 L0 8" stroke="#c49530" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M0 0 L8 4 L0 8" stroke="#c49530" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </motion.div>
         </motion.div>
@@ -989,9 +988,9 @@ function VideoSection() {
               >
                 {playing ? (
                   <iframe width="560" height="315" src="https://www.youtube.com/embed/YFbbeJZlYXk?si=_OwQdV0oHUgUluFo"
-                   title="YouTube video player" 
-                  frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                   referrerPolicy="strict-origin-when-cross-origin" allowFullScreen>
+                    title="YouTube video player"
+                    frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin" allowFullScreen>
 
                   </iframe>
                 ) : (
@@ -1051,7 +1050,7 @@ function VideoSection() {
 //       <div className={`${CONTAINER} ${MAX_W}`}>
 //         {/* <AnimatedSection>
 
-        
+
 //         </AnimatedSection> */}
 //       </div>
 //     </section>
@@ -1438,7 +1437,7 @@ function ContactSection() {
                   </div>
                   <div>
                     <div className="text-xs font-semibold" style={{ color: '#8a8a8a' }}>البريد الإلكتروني</div>
-                    <div className="text-sm" style={{ color: '#0a0a0a' }}>hello@aslmad.com</div>
+                    <div className="text-sm" style={{ color: '#0a0a0a' }}>malalyassin6@gmail.com</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1450,7 +1449,7 @@ function ContactSection() {
                   </div>
                   <div>
                     <div className="text-xs font-semibold" style={{ color: '#8a8a8a' }}>الموقع</div>
-                    <div className="text-sm" style={{ color: '#0a0a0a' }}>المغرب — في قلب الأطلس</div>
+                    <div className="text-sm" style={{ color: '#0a0a0a' }}>المغرب — في قلب </div>
                   </div>
                 </div>
               </div>
@@ -1495,7 +1494,7 @@ function ContactSection() {
                   <label className="block text-xs font-semibold mb-1.5" style={{ color: '#3a3a3a' }}>الاسم</label>
                   <input
                     type="text"
-                    placeholder="اسمك الكريم"
+                    placeholder="اسمك"
                     className="w-full px-4 border outline-none transition-all duration-200"
                     style={{
                       height: '48px',
@@ -1560,7 +1559,7 @@ function ContactSection() {
                 />
               </div>
 
-            
+
               <motion.button
                 type="submit"
                 className="inline-flex items-center justify-center gap-2 border-none cursor-pointer font-semibold"

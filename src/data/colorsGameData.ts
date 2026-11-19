@@ -26,8 +26,8 @@ export const colorAssets: ColorAsset[] = [
     id: 'blue',
     colorName: 'Blue',
     colorHex: '#2196F3',
-    tifinaghName: 'ⴰⵣⵔⵡⴰⵍ',
-    latinName: 'Azrwal',
+    tifinaghName: 'ⴰⵥⵕⵡⴰⵍ',
+    latinName: 'Aẓṛwal',
     arabicName: 'أزرق',
     objectName: 'Umbrella',
     objectEmoji: '☂️',
@@ -77,62 +77,14 @@ export const colorAssets: ColorAsset[] = [
     objectEmoji: '☁️',
     objectImage: '/assets/colors/cloud.svg',
   },
-  {
-    id: 'orange',
-    colorName: 'Orange',
-    colorHex: '#FF9800',
-    tifinaghName: 'ⴰⵍⵉⵎⵓⵏⵉ',
-    latinName: 'Alimuni',
-    arabicName: 'برتقالي',
-    objectName: 'Orange',
-    objectEmoji: '🍊',
-    objectImage: '/assets/colors/orange.svg',
-  },
-  {
-    id: 'brown',
-    colorName: 'Brown',
-    colorHex: '#795548',
-    tifinaghName: 'ⴰⵎⵔⵡⴰⵖ',
-    latinName: 'Amrwaɣ',
-    arabicName: 'بني',
-    objectName: 'Bear',
-    objectEmoji: '🧸',
-    objectImage: '/assets/colors/bear.svg',
-  },
-  {
-    id: 'purple',
-    colorName: 'Purple',
-    colorHex: '#9C27B0',
-    tifinaghName: 'ⴰⵎⴷⵓⴷⵉ',
-    latinName: 'Amdudi',
-    arabicName: 'بنفسجي',
-    objectName: 'Grapes',
-    objectEmoji: '🍇',
-    objectImage: '/assets/colors/grapes.svg',
-  },
-  {
-    id: 'pink',
-    colorName: 'Pink',
-    colorHex: '#E91E63',
-    tifinaghName: 'ⴰⵣⵔⵖⴰⵏ',
-    latinName: 'Azrɣan',
-    arabicName: 'وردي',
-    objectName: 'Flower',
-    objectEmoji: '🌸',
-    objectImage: '/assets/colors/flower.svg',
-  },
 ]
 
-/** The 10 static color circles always displayed in the palette */
+/** The six color circles from the reference lessons */
 export const paletteColors: { colorHex: string; label: string }[] = [
   { colorHex: '#F44336', label: 'ⴰⵣⴳⴳⵯⴰⵖ' },   // Red
-  { colorHex: '#2196F3', label: 'ⴰⵣⵔⵡⴰⵍ' },   // Blue
+  { colorHex: '#2196F3', label: 'ⴰⵥⵕⵡⴰⵍ' },   // Blue
   { colorHex: '#4CAF50', label: 'ⴰⵣⴳⵣⴰⵡ' },   // Green
-  { colorHex: '#E91E63', label: 'ⴰⵣⵔⵖⴰⵏ' },   // Pink
   { colorHex: '#FFD700', label: 'ⴰⵡⵔⴰⵖ' },   // Yellow
-  { colorHex: '#795548', label: 'ⴰⵎⵔⵡⴰⵖ' },   // Brown
-  { colorHex: '#9C27B0', label: 'ⴰⵎⴷⵓⴷⵉ' },   // Purple
-  { colorHex: '#FF9800', label: 'ⴰⵍⵉⵎⵓⵏⵉ' },   // Orange
   { colorHex: '#212121', label: 'ⴰⴱⵔⴽⴰⵏ' },   // Black
   { colorHex: '#F5F5F5', label: 'ⴰⵎⵍⵍⴰⵍ' },   // White
 ]

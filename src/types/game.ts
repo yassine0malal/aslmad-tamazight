@@ -1,30 +1,31 @@
-export type View = 'landing' | 'setup' | 'game-hub' | 'game1' | 'game2' | 'game3' | 'game4' | 'souk' | 'gameover';
+export type View = 'landing' | 'setup' | 'game-hub' | 'game1' | 'game2' | 'game3' | 'game4' | 'gameover';
 
 export interface Team {
   id: string;
   name: string;
   score: number;
   avatar: string;
-  coins: number;
   color: string;
-  accessories: string[];
 }
+
+export type VocabularyCategory = 'people' | 'school' | 'body' | 'colors' | 'subjects' | 'season' | 'animals';
 
 export interface LetterPuzzle {
   sequence: string[];
   correctAnswer: string;
   options: string[];
   hint: string;
+  wordTifinagh: string;
+  meaning: string;
+  emoji: string;
 }
 
-export interface AnimalPuzzle {
-  animalName: string;
-  animalImage: string;
-  correctLetter: string;
-  fullWordTifinagh: string;
-  fullWordLatin: string;
-  options: string[];
-  pronunciation: string;
+export interface WordPuzzle {
+  id: string;
+  wordTifinagh: string;
+  wordArabic: string;
+  wordLatin: string;
+  emoji: string;
 }
 
 export interface RiddleOption {
@@ -32,30 +33,21 @@ export interface RiddleOption {
   tifinaghText: string;
   phoneticText: string;
   meaning: string;
-  category: 'animal' | 'nature' | 'food';
+  category: VocabularyCategory;
+  emoji: string;
 }
 
 export interface RiddleChallenge {
   id: string;
-  imageAsset: string;
   correctAnswerId: string;
   options: RiddleOption[];
-}
-
-export interface ShopItem {
-  id: string;
-  name: string;
-  description: string;
-  cost: number;
-  icon: string;
-  category: 'background' | 'accessory' | 'emote';
 }
 
 export interface MemoryCard {
   id: string;
   pairId: string;
   label: string;
-  image: string;
+  emoji: string;
   isFlipped: boolean;
   isMatched: boolean;
 }
@@ -70,7 +62,7 @@ export interface AppState {
   groupCount: number;
   matchHalf: 1 | 2;
   game1Deck: LetterPuzzle[];
-  game2Deck: AnimalPuzzle[];
+  game2Deck: WordPuzzle[];
   game4Deck: RiddleChallenge[];
   memoryDeck: MemoryCard[];
   memorySelection: string[];
@@ -98,6 +90,8 @@ export type GameAction =
   | { type: 'START_GAME'; payload: { teams: TeamSetupPayload[]; groupCount: number } }
   | { type: 'SELECT_GAME'; payload: { game: 'game1' | 'game2' | 'game3' | 'game4' } }
   | { type: 'NEXT_PUZZLE' }
+  | { type: 'SET_WORD_DECK'; payload: { wordSetId?: string } }
+  | { type: 'SET_LETTER_DECK'; payload: { wordSetId?: string } }
   | { type: 'ANSWER_SELECTED'; payload: { answer: string } }
   | { type: 'ANSWER_CORRECT'; payload?: { points?: number } }
   | { type: 'ANSWER_INCORRECT' }
@@ -109,8 +103,6 @@ export type GameAction =
   | { type: 'RESET_MEMORY_SELECTION' }
   | { type: 'SET_MEMORY_DIFFICULTY'; payload: { cardCount: number } }
   | { type: 'RESET_GAME' }
-  | { type: 'GO_TO_SOUK' }
-  | { type: 'BUY_ITEM'; payload: { itemId: string; teamIndex: number } }
   | { type: 'RETURN_TO_HUB' }
   | { type: 'RETURN_TO_SETUP' }
   | { type: 'END_GAME' };

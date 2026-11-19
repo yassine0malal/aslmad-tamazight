@@ -12,7 +12,7 @@ import AmudruMatchView from '@/views/AmudruMatchView'
 import MemoryMatchView from '@/views/MemoryMatchView'
 import AmsasaRiddleView from '@/views/AmsasaRiddleView'
 import ColorsGameView from '@/views/ColorsGameView'
-import SoukView from '@/views/SoukView'
+import PronunciationView from '@/views/PronunciationView'
 import CultureView from '@/views/CultureView'
 import GameOverView from '@/views/GameOverView'
 import NotFoundView from '@/views/NotFoundView'
@@ -48,7 +48,7 @@ export default function App() {
           <Route path={routes.culture} element={<CultureView />} />
           <Route path={routes.about} element={<AboutView />} />
           <Route path={routes.colors} element={<ColorsGameView />} />
-          <Route path={routes.souk} element={<SoukView />} />
+          <Route path={routes.pronunciation} element={<PronunciationView />} />
 
           {/* All routes below require setup to be completed */}
           <Route element={<ProtectedRoute />}>

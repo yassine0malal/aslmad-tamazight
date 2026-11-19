@@ -9,7 +9,7 @@ export const routes = {
   riddle: '/game/riddle',
   colors: '/game/colors',
   culture: '/culture',
-  souk: '/souk',
+  pronunciation: '/pronunciation',
   about: '/about',
   gameOver: '/gameover',
 } as const
@@ -37,7 +37,7 @@ export const navGroups: NavGroup[] = [
     icon: 'groups',
     children: [
       { to: routes.nextLetter, label: 'تحدي الحرف التالي', icon: 'next-letter', description: 'أكمل تسلسل الحروف' },
-      { to: routes.animalMatch, label: 'مباراة الحيوانات', icon: 'animal', description: 'اختر الحرف الصحيح للحيوان' },
+      { to: routes.animalMatch, label: 'مباراة الكلمات', icon: 'animal', description: 'ابنِ الكلمة من الحروف' },
       { to: routes.memory, label: 'لعبة الذاكرة', icon: 'mind', description: 'ابحث عن الأزواج المطابقة' },
       { to: routes.riddle, label: 'أمساسا ن توالفت', icon: 'picture-quiz', description: 'لعبة التخمين بالصور' },
       { to: routes.gameHub, label: 'المركز', icon: 'all', description: 'الكل' },
@@ -60,11 +60,11 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
-    id: 'souk',
-    label: 'السوق',
-    icon: 'market',
+    id: 'pronunciation',
+    label: 'النطق والاستماع',
+    icon: 'pronunciation',
     children: [
-      { to: routes.souk, label: 'السوق الافتراضي', icon: 'market', description: 'أنفق نقاطك واشتري' },
+      { to: routes.pronunciation, label: 'تدريب النطق', icon: 'pronunciation', description: 'استمع إلى الكلمة وردّدها' },
     ],
   },
 ]
@@ -73,10 +73,10 @@ export const navGroups: NavGroup[] = [
 export const navLinks = [
   { to: routes.gameHub, label: 'المركز', icon: 'home' as const },
   { to: routes.nextLetter, label: 'تحدي الحرف' },
-  { to: routes.animalMatch, label: 'مباراة الحيوانات' },
+  { to: routes.animalMatch, label: 'مباراة الكلمات' },
   { to: routes.memory, label: 'لعبة الذاكرة' },
   { to: routes.riddle, label: 'أمساسا' },
   { to: routes.colors, label: 'ألوان' },
   { to: routes.culture, label: 'الثقافة' },
-  { to: routes.souk, label: 'السوق', icon: 'shopping-bag' as const },
+  { to: routes.pronunciation, label: 'النطق والاستماع', icon: 'volume-2' as const },
 ] as const

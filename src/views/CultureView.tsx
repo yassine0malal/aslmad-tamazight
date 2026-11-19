@@ -1,16 +1,6 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
-import {
-  ChevronLeft,
-  ChevronRight,
-  Info,
-  Sparkles,
-  LayoutGrid,
-  Columns,
-  Pause,
-  Play,
-  Keyboard,
-} from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { LayoutGrid, ChevronsDown } from 'lucide-react'
 import { cultureItems, type CultureItem } from '@/data/cultureData'
 import { floatingLetters } from '@/data/constants'
 
@@ -33,13 +23,7 @@ const itemsWithImages = cultureItems.map((item) => ({
   imageUrl: imageMap[item.id] ?? '',
 }))
 
-/* ─── Constants ─── */
-const CARD_W = 320
-const GAP = 28
-const CARD_UNIT = CARD_W + GAP
-const AUTO_PLAY_MS = 4500
-
-type ViewMode = 'carousel' | 'grid'
+type ViewMode = 'scroll' | 'grid'
 
 /* ─── Fallback for broken images ─── */
 function imgError(e: React.SyntheticEvent<HTMLImageElement>) {
@@ -54,8 +38,6 @@ function CultureCard({
   onHoverEnd,
   onClick,
   index,
-  mode,
-  isCenter,
 }: {
   item: CultureItem & { imageUrl: string }
   isSelected: boolean
@@ -63,32 +45,7 @@ function CultureCard({
   onHoverEnd: () => void
   onClick?: () => void
   index: number
-  mode: ViewMode
-  isCenter?: boolean
 }) {
-  // 3D tilt based on position from center
-  const tiltX = useMotionValue(0)
-  const tiltY = useMotionValue(0)
-  const rotateX = useTransform(tiltY, [-0.5, 0.5], [4, -4])
-  const rotateY = useTransform(tiltX, [-0.5, 0.5], [-4, 4])
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (mode !== 'carousel') return
-      const rect = e.currentTarget.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
-      tiltX.set(x)
-      tiltY.set(y)
-    },
-    [mode, tiltX, tiltY],
-  )
-
-  const handleMouseLeave = useCallback(() => {
-    tiltX.set(0)
-    tiltY.set(0)
-  }, [tiltX, tiltY])
-
   return (
     <motion.div
       layout
@@ -104,29 +61,19 @@ function CultureCard({
       onHoverStart={onHoverStart}
       onHoverEnd={onHoverEnd}
       onClick={onClick}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{ perspective: 1200 }}
     >
       <motion.div
         className="overflow-hidden relative will-change-transform"
         style={{
           borderRadius: '24px',
           background: 'var(--clay-surface-card)',
-          border: isCenter && mode === 'carousel'
-            ? '1.5px solid rgba(255,255,255,0.2)'
-            : '1px solid var(--clay-hairline)',
-          height: mode === 'grid' ? '360px' : '340px',
-          rotateX: mode === 'carousel' ? rotateX : 0,
-          rotateY: mode === 'carousel' ? rotateY : 0,
+          border: '1px solid var(--clay-hairline)',
+          height: '360px',
         }}
         whileHover={{
-          scale: mode === 'carousel' ? 1.05 : 1.02,
-          y: mode === 'carousel' ? -8 : -4,
-          boxShadow:
-            mode === 'carousel'
-              ? '0 28px 72px rgba(0,0,0,0.20), 0 10px 24px rgba(0,0,0,0.10)'
-              : '0 16px 40px rgba(0,0,0,0.12)',
+          scale: 1.02,
+          y: -4,
+          boxShadow: '0 16px 40px rgba(0,0,0,0.12)',
           transition: { type: 'spring', stiffness: 280, damping: 22 },
         }}
       >
@@ -271,108 +218,163 @@ function CultureCard({
   )
 }
 
+/* ─── Scroll Gallery Card ───
+ * One card per screen: it slides in from the right as you scroll it into view,
+ * so scrolling down brings the next card in from the right edge.
+ */
+function ScrollCard({
+  item,
+  index,
+  total,
+  onOpen,
+}: {
+  item: CultureItem & { imageUrl: string }
+  index: number
+  total: number
+  onOpen: () => void
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'center center'],
+  })
+
+  const x = useTransform(scrollYProgress, [0, 1], ['48%', '0%'])
+  const opacity = useTransform(scrollYProgress, [0, 0.45, 1], [0, 0.7, 1])
+  const scale = useTransform(scrollYProgress, [0, 1], [0.9, 1])
+  const rotate = useTransform(scrollYProgress, [0, 1], [3.5, 0])
+
+  return (
+    <div
+      ref={ref}
+      className="flex min-h-[100dvh] items-center justify-center px-2 py-6"
+    >
+      <motion.button
+        type="button"
+        onClick={onOpen}
+        className="group relative block w-full max-w-5xl overflow-hidden text-right"
+        style={{
+          x,
+          opacity,
+          scale,
+          rotate,
+          borderRadius: '32px',
+          height: 'clamp(340px, 74vh, 760px)',
+          background: 'var(--clay-surface-card)',
+          border: '1px solid var(--clay-hairline)',
+          boxShadow: '0 28px 70px rgba(61, 44, 20, 0.18)',
+        }}
+        whileHover={{ boxShadow: '0 34px 90px rgba(61, 44, 20, 0.24)' }}
+      >
+        {item.imageUrl ? (
+          <img
+            src={item.imageUrl}
+            alt={item.titleAr}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            onError={imgError}
+            draggable={false}
+          />
+        ) : (
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ background: 'var(--clay-surface-soft)' }}
+          >
+            <span className="text-8xl">{item.emoji}</span>
+          </div>
+        )}
+
+        {/* Readability gradient */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(0,0,0,0.25) 0%, transparent 28%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.88) 100%)',
+          }}
+        />
+
+        {/* Index + counter */}
+        <div className="absolute top-5 right-5 flex items-center gap-2">
+          <span
+            className="rounded-full px-3 py-1 text-xs font-bold text-white tabular-nums"
+            style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }}
+          >
+            {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+          </span>
+          <span className="text-2xl" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.35))' }}>
+            {item.emoji}
+          </span>
+        </div>
+
+        {/* Caption block */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
+          <p
+            className="tifinagh-text text-3xl font-bold leading-tight text-white sm:text-5xl"
+            style={{ textShadow: '0 2px 12px rgba(0,0,0,0.45)' }}
+          >
+            {item.titleAm}
+          </p>
+          <p
+            className="mt-2 text-lg font-semibold text-white/90 sm:text-2xl"
+            style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}
+          >
+            {item.titleAr}
+          </p>
+          <p className="tifinagh-text mt-3 line-clamp-2 max-w-3xl text-sm leading-relaxed text-white/85 sm:text-base">
+            {item.descriptionAm}
+          </p>
+        </div>
+      </motion.button>
+    </div>
+  )
+}
+
 /* ─── Main View ─── */
 export default function CultureView() {
-  const [scrollX, setScrollX] = useState(0)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [visible, setVisible] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>('carousel')
-  const [autoPlay, setAutoPlay] = useState(true)
+  const [viewMode, setViewMode] = useState<ViewMode>('scroll')
   const [modalItem, setModalItem] = useState<(CultureItem & { imageUrl: string }) | null>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const trackRef = useRef<HTMLDivElement>(null)
-  const userPausedRef = useRef(false)
 
   const items = itemsWithImages
-
-  const maxScroll = useMemo(
-    () => Math.max(0, (items.length - 1) * CARD_UNIT),
-    [items.length],
-  )
 
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 80)
     return () => clearTimeout(timer)
   }, [])
 
-  /* ── Keyboard navigation ── */
-  useEffect(() => {
-    if (viewMode !== 'carousel') return
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') scroll('prev')
-      if (e.key === 'ArrowRight') scroll('next')
-    }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewMode, maxScroll])
-
-  /* ── Modal escape key ── */
+  /* ── Modal keys: Esc closes, arrows step through the images ── */
   useEffect(() => {
     if (!modalItem) return
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setModalItem(null)
+      if (e.key === 'Escape') {
+        setModalItem(null)
+        return
+      }
+
+      const step =
+        e.key === 'ArrowRight' || e.key === 'ArrowDown'
+          ? 1
+          : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+            ? -1
+            : 0
+      if (step === 0) return
+
+      e.preventDefault()
+      setModalItem((current) => {
+        if (!current) return current
+        const index = items.findIndex((item) => item.id === current.id)
+        if (index === -1) return current
+        return items[(index + step + items.length) % items.length]
+      })
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [modalItem])
-
-  /* ── Auto-play ── */
-  useEffect(() => {
-    if (!autoPlay || viewMode === 'grid') return
-    const id = setInterval(() => {
-      setScrollX((prev) => {
-        const next = prev - CARD_UNIT
-        if (Math.abs(next) >= maxScroll) return 0
-        return next
-      })
-    }, AUTO_PLAY_MS)
-    return () => clearInterval(id)
-  }, [autoPlay, viewMode, maxScroll])
-
-  const scroll = useCallback(
-    (dir: 'prev' | 'next') => {
-      setScrollX((prev) => {
-        if (dir === 'prev') {
-          const val = prev + CARD_UNIT
-          return val > 0 ? 0 : val
-        }
-        const val = prev - CARD_UNIT
-        return val < -maxScroll ? -maxScroll : val
-      })
-    },
-    [maxScroll],
-  )
-
-  /* ── Drag handler — snap to nearest card ── */
-  const handleDragEnd = useCallback(
-    (_: unknown, info: { offset: { x: number } }) => {
-      const threshold = CARD_UNIT * 0.15
-      if (info.offset.x > threshold) scroll('prev')
-      else if (info.offset.x < -threshold) scroll('next')
-      // Snap to nearest card
-      else {
-        const nearestIdx = Math.round(Math.abs(scrollX) / CARD_UNIT)
-        setScrollX(-nearestIdx * CARD_UNIT)
-      }
-      if (!userPausedRef.current) setAutoPlay(true)
-    },
-    [scroll, scrollX],
-  )
-
-  /* Calculate the "active" index from scroll position */
-  const currentIndex = useMemo(() => {
-    if (maxScroll === 0) return 0
-    return Math.min(
-      Math.round(Math.abs(scrollX) / CARD_UNIT),
-      items.length - 1,
-    )
-  }, [scrollX, maxScroll, items.length])
+  }, [modalItem, items])
 
   return (
     <div className="min-h-screen w-full pb-20 relative">
-      {/* ── Animated decorative background (carousel only) ── */}
-      {viewMode === 'carousel' && (
+      {/* ── Animated decorative background (scroll mode only) ── */}
+      {viewMode !== 'grid' && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Gradient orb 1 */}
           <motion.div
@@ -427,16 +429,7 @@ export default function CultureView() {
           animate={visible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          <motion.div
-            className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full mb-4"
-            style={{ background: 'var(--clay-surface-card)' }}
-            whileHover={{ scale: 1.03 }}
-          >
-            <Sparkles className="w-4 h-4" style={{ color: 'var(--clay-ochre)' }} />
-            <span className="clay-caption font-semibold" style={{ color: 'var(--clay-ochre)' }}>
-              ⵉⵎⴰⵣⵉⵖⵏ · أمازيغ
-            </span>
-          </motion.div>
+          
 
           <h1 className="clay-display-sm mb-2" style={{ color: 'var(--clay-ink)' }}>
             المعرض الثقافي الأمازيغي
@@ -457,7 +450,7 @@ export default function CultureView() {
           transition={{ delay: 0.2, duration: 0.4 }}
         >
           {/* Hint */}
-          <div
+          {/* <div
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl"
             style={{ background: 'var(--clay-surface-card)' }}
           >
@@ -465,30 +458,26 @@ export default function CultureView() {
             <span className="clay-caption" style={{ color: 'var(--clay-muted)' }}>
               hover للوصف
             </span>
-          </div>
-
-          {/* View toggle */}
+          </div>           */}
           <div className="flex items-center gap-0.5">
             <button
-              onClick={() => setViewMode('carousel')}
+              onClick={() => setViewMode('scroll')}
               className="flex items-center gap-1.5 px-3 py-2 transition-all duration-200"
               style={{
                 borderRadius: '10px 0 0 10px',
-                background:
-                  viewMode === 'carousel' ? 'var(--clay-ink)' : 'var(--clay-surface-card)',
-                color: viewMode === 'carousel' ? '#fff' : 'var(--clay-muted)',
+                background: viewMode === 'scroll' ? 'var(--clay-ink)' : 'var(--clay-surface-card)',
+                color: viewMode === 'scroll' ? '#fff' : 'var(--clay-muted)',
               }}
             >
-              <Columns className="w-3.5 h-3.5" />
-              <span className="clay-caption">كاروسيل</span>
+              <ChevronsDown className="w-3.5 h-3.5" />
+              <span className="clay-caption">تمرير</span>
             </button>
             <button
               onClick={() => setViewMode('grid')}
               className="flex items-center gap-1.5 px-3 py-2 transition-all duration-200"
               style={{
                 borderRadius: '0 10px 10px 0',
-                background:
-                  viewMode === 'grid' ? 'var(--clay-ink)' : 'var(--clay-surface-card)',
+                background: viewMode === 'grid' ? 'var(--clay-ink)' : 'var(--clay-surface-card)',
                 color: viewMode === 'grid' ? '#fff' : 'var(--clay-muted)',
               }}
             >
@@ -496,205 +485,32 @@ export default function CultureView() {
               <span className="clay-caption">شبكة</span>
             </button>
           </div>
-
-          {/* Auto-play toggle */}
-          {viewMode === 'carousel' && (
-            <button
-              onClick={() => {
-                userPausedRef.current = !autoPlay
-                setAutoPlay((p) => !p)
-              }}
-              className="flex items-center gap-1.5 px-3 py-2 transition-all duration-200 rounded-xl"
-              style={{
-                background: autoPlay ? 'var(--clay-surface-card)' : 'var(--clay-surface-soft)',
-                color: autoPlay ? 'var(--clay-ink)' : 'var(--clay-muted-soft)',
-              }}
-            >
-              {autoPlay ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-              <span className="clay-caption">{autoPlay ? 'إيقاف' : 'تشغيل'}</span>
-            </button>
-          )}
-
-          {/* Keyboard hint */}
-          {viewMode === 'carousel' && (
-            <div
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl"
-              style={{ background: 'var(--clay-surface-soft)' }}
-            >
-              <Keyboard className="w-3.5 h-3.5" style={{ color: 'var(--clay-muted-soft)' }} />
-              <span className="clay-caption" style={{ color: 'var(--clay-muted-soft)' }}>
-                ← →
-              </span>
-            </div>
-          )}
         </motion.div>
 
-        {/* ─── CAROUSEL MODE ─── */}
-        {viewMode === 'carousel' && (
-          <motion.div
-            className="relative"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-          >
-            {/* Glassmorphism arrows */}
-            {scrollX < 0 && (
-              <motion.button
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                onClick={() => scroll('prev')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
-                style={{
-                  borderRadius: '9999px',
-                  background: 'rgba(255,255,255,0.6)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                  color: 'var(--clay-ink)',
-                }}
-                whileHover={{
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
-                  background: 'rgba(255,255,255,0.85)',
-                }}
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </motion.button>
-            )}
-
-            {scrollX > -maxScroll && (
-              <motion.button
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                onClick={() => scroll('next')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
-                style={{
-                  borderRadius: '9999px',
-                  background: 'rgba(255,255,255,0.6)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                  color: 'var(--clay-ink)',
-                }}
-                whileHover={{
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
-                  background: 'rgba(255,255,255,0.85)',
-                }}
-              >
-                <ChevronRight className="w-5 h-5" />
-              </motion.button>
-            )}
-
-            {/* ── Track with drag support ── */}
-            <div
-              ref={containerRef}
-              className="overflow-hidden px-4"
-              onMouseEnter={() => {
-                if (!userPausedRef.current) setAutoPlay(false)
-              }}
-              onMouseLeave={() => {
-                if (!userPausedRef.current) setAutoPlay(true)
-              }}
-            >
-              <motion.div
-                ref={trackRef}
-                className="flex cursor-grab active:cursor-grabbing"
-                style={{ gap: `${GAP}px` }}
-                animate={{ x: scrollX }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 260,
-                  damping: 30,
-                  mass: 0.8,
-                }}
-                drag="x"
-                dragConstraints={{
-                  left: -maxScroll - 20,
-                  right: 20,
-                }}
-                dragElastic={0.08}
-                onDragEnd={handleDragEnd}
-                whileTap={{ cursor: 'grabbing' }}
-                onDragStart={() => setAutoPlay(false)}
-              >
-                {items.map((item, idx) => {
-                  const isCenter = idx === currentIndex
-
-                  return (
-                    <div
-                      key={item.id}
-                      className="shrink-0 select-none"
-                      style={{ width: `${CARD_W}px` }}
-                    >
-                      <CultureCard
-                        item={item}
-                        index={idx}
-                        mode="carousel"
-                        isCenter={isCenter}
-                        isSelected={selectedId === item.id}
-                        onHoverStart={() => {
-                          setSelectedId(item.id)
-                          setAutoPlay(false)
-                        }}
-                        onHoverEnd={() => {
-                          setSelectedId(null)
-                          if (!userPausedRef.current) setAutoPlay(true)
-                        }}
-                        onClick={() => setModalItem(item)}
-                      />
-                    </div>
-                  )
-                })}
-              </motion.div>
-            </div>
-
-            {/* ── Progress + Counter ── */}
-            <div className="flex items-center justify-center gap-3 mt-6">
+        {/* ─── SCROLL MODE — one card per screen, entering from the right ─── */}
+        {viewMode === 'scroll' && (
+          <div className="relative -mx-2 overflow-x-clip">
+            {items.map((item, idx) => (
+              <ScrollCard
+                key={item.id}
+                item={item}
+                index={idx}
+                total={items.length}
+                onOpen={() => setModalItem(item)}
+              />
+            ))}
+            <div className="-mt-16 flex justify-center pb-10">
               <div
-                className="relative h-1.5 rounded-full overflow-hidden flex-1 max-w-sm"
-                style={{ background: 'var(--clay-hairline)' }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
+                style={{ background: 'var(--clay-surface-card)' }}
               >
-                <motion.div
-                  className="absolute inset-y-0 left-0 rounded-full"
-                  style={{ background: 'var(--clay-ink)' }}
-                  animate={{
-                    width: `${((currentIndex + 1) / items.length) * 100}%`,
-                  }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                />
+                <ChevronsDown className="w-4 h-4" style={{ color: 'var(--clay-muted)' }} />
+                <span className="clay-caption" style={{ color: 'var(--clay-muted)' }}>
+                  مرر للأسفل لبقية المعرض
+                </span>
               </div>
-              <span className="clay-caption tabular-nums" style={{ color: 'var(--clay-muted)' }}>
-                {String(currentIndex + 1).padStart(2, '0')}/{String(items.length).padStart(2, '0')}
-              </span>
             </div>
-
-            {/* ── Dot indicators ── */}
-            <div className="flex items-center justify-center gap-2 mt-3">
-              {items.map((item, idx) => {
-                const isActive = idx === currentIndex
-                return (
-                  <motion.button
-                    key={item.id}
-                    onClick={() => {
-                      setScrollX(-idx * CARD_UNIT)
-                    }}
-                    className="rounded-full"
-                    style={{
-                      height: '8px',
-                      background: isActive ? 'var(--clay-ink)' : 'var(--clay-hairline)',
-                    }}
-                    animate={{
-                      width: isActive ? '32px' : '8px',
-                      opacity: Math.abs(idx - currentIndex) > 6 ? 0.3 : 1,
-                    }}
-                    transition={{ duration: 0.35, ease: 'easeInOut' }}
-                    whileHover={{ scale: 1.5 }}
-                  />
-                )
-              })}
-            </div>
-          </motion.div>
+          </div>
         )}
 
         {/* ─── GRID MODE ─── */}
@@ -711,7 +527,6 @@ export default function CultureView() {
                 key={item.id}
                 item={item}
                 index={idx}
-                mode="grid"
                 isSelected={selectedId === item.id}
                 onHoverStart={() => setSelectedId(item.id)}
                 onHoverEnd={() => setSelectedId(null)}

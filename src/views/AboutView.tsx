@@ -47,7 +47,7 @@ const values = [
 
 const features = [
   { icon: iconNextLetter, title: 'تحدي الحرف التالي', desc: 'اختبر معرفتك بتسلسل حروف تيفيناغ.' },
-  { icon: iconAnimal, title: 'مباراة الحيوانات', desc: 'تعلّم أسماء الحيوانات بالأمازيغية.' },
+  { icon: iconAnimal, title: 'مباراة الكلمات', desc: 'ابنِ كلمات أمازيغية من الحروف.' },
   { icon: iconMind, title: 'لعبة الذاكرة', desc: 'درّب ذاكرتك باكتشاف الأزواج.' },
   { icon: iconPictureQuiz, title: 'أمساسا ن توالفت', desc: 'لعبة التخمين بالصور.' },
   { icon: iconKids, title: 'ألعاب الألوان', desc: 'تعلّم أسماء الألوان.' },

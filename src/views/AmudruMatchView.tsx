@@ -2,10 +2,14 @@ import { useGame } from '@/context/GameContext'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import ParticleBurst from '@/components/ParticleBurst'
+import WordImage from '@/components/WordImage'
 import FloatingScore from '@/components/FloatingScore'
 import { Check, X, ArrowRight, Volume2, Delete } from 'lucide-react'
 import { routes } from '@/lib/routes'
 import { TIFINAGH_LETTERS } from '@/data/gameData'
+import { wordSets } from '@/data/wordSets'
+
+const keyTints = ['#fff7d6', '#e7f8ef', '#eee7ff', '#ffede4', '#d9edff']
 
 export default function AmudruMatchView() {
   const { state, dispatch } = useGame()
@@ -17,6 +21,16 @@ export default function AmudruMatchView() {
   const [showReveal, setShowReveal] = useState(false)
   const [typedLetters, setTypedLetters] = useState('')
 
+  // ─── Chosen word set (teacher picks before the round starts) ───
+  const [choosing, setChoosing] = useState(true)
+  const [activeSetId, setActiveSetId] = useState<string | null>(null)
+
+  const startRound = (wordSetId?: string) => {
+    setActiveSetId(wordSetId ?? null)
+    dispatch({ type: 'SET_WORD_DECK', payload: { wordSetId } })
+    setChoosing(false)
+  }
+
   // ─── Word construction state ───
   const [filledSlots, setFilledSlots] = useState<string[]>([])
   const [currentSlot, setCurrentSlot] = useState(0)
@@ -24,16 +38,15 @@ export default function AmudruMatchView() {
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const puzzle = state.game2Deck[state.currentPuzzleIndex]
-  const animalImageSrc = puzzle ? puzzle.animalImage : ''
   const isLastPuzzle = state.currentPuzzleIndex >= state.game2Deck.length - 1
   const totalPuzzles = state.game2Deck.length
-  const wordLength = puzzle?.fullWordTifinagh.length || 0
+  const wordLength = puzzle?.wordTifinagh.length || 0
   const allSlotsFilled = filledSlots.length > 0 && filledSlots.every((s) => s !== '')
 
   // ─── Curated letter pool (12-16 letters) ───
   const letterPool = useMemo(() => {
     if (!puzzle) return []
-    const wordLetters = Array.from(new Set(puzzle.fullWordTifinagh.split('')))
+    const wordLetters = Array.from(new Set(puzzle.wordTifinagh.split('')))
     const distractors = TIFINAGH_LETTERS.filter((l) => !wordLetters.includes(l))
     const shuffled = [...distractors].sort(() => Math.random() - 0.5)
     const targetCount = Math.max(12, Math.min(16, wordLetters.length + 6))
@@ -46,7 +59,7 @@ export default function AmudruMatchView() {
   const letterCounts = useMemo(() => {
     if (!puzzle) return {} as Record<string, number>
     const counts: Record<string, number> = {}
-    for (const char of puzzle.fullWordTifinagh) {
+    for (const char of puzzle.wordTifinagh) {
       counts[char] = (counts[char] || 0) + 1
     }
     return counts
@@ -85,7 +98,7 @@ export default function AmudruMatchView() {
     setShowReveal(false)
     setTypedLetters('')
     if (puzzle) {
-      setFilledSlots(new Array(puzzle.fullWordTifinagh.length).fill(''))
+      setFilledSlots(new Array(puzzle.wordTifinagh.length).fill(''))
       setCurrentSlot(0)
     }
   }, [state.currentPuzzleIndex])
@@ -93,7 +106,7 @@ export default function AmudruMatchView() {
   // ─── Typewriter reveal on correct answer ───
   useEffect(() => {
     if (showReveal && puzzle) {
-      const letters = puzzle.fullWordTifinagh.split('')
+      const letters = puzzle.wordTifinagh.split('')
       let idx = 0
       const interval = setInterval(() => {
         if (idx <= letters.length) {
@@ -168,8 +181,8 @@ export default function AmudruMatchView() {
     if (!puzzle || state.lastAnswerCorrect !== null || !allSlotsFilled) return
 
     const userWord = filledSlots.join('')
-    if (userWord === puzzle.fullWordTifinagh) {
-      const cardEl = document.getElementById('animal-card')
+    if (userWord === puzzle.wordTifinagh) {
+      const cardEl = document.getElementById('word-card')
       if (cardEl) {
         const rect = cardEl.getBoundingClientRect()
         setParticleOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
@@ -192,6 +205,91 @@ export default function AmudruMatchView() {
 
   const hasAnswered = state.lastAnswerCorrect !== null
 
+  if (choosing) {
+    return (
+      <div className="w-full" dir="rtl">
+        <div className="text-center mb-6">
+          <h2 className="clay-title-lg mb-1" style={{ color: 'var(--clay-ink)' }}>
+            مباراة الكلمات
+          </h2>
+          <p className="clay-body-md" style={{ color: 'var(--clay-muted)' }}>
+            اختر مجموعة كلمات جاهزة، أو ابدأ بكلمات عشوائية من كل المفردات.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 max-w-3xl mx-auto">
+          {wordSets.map((set) => {
+            const isActive = activeSetId === set.id
+            return (
+              <button
+                key={set.id}
+                onClick={() => startRound(set.id)}
+                className="clay-card kid-card-hover p-5 text-start"
+                style={{
+                  borderRadius: '24px',
+                  border: isActive ? '3px solid var(--clay-success)' : '3px solid #ffffff',
+                }}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <WordImage emoji={set.emoji} size={48} />
+                  <div className="min-w-0">
+                    <div className="clay-title-sm truncate" style={{ color: 'var(--clay-ink)' }}>
+                      {set.title}
+                    </div>
+                    <div className="clay-caption" style={{ color: 'var(--clay-muted)' }}>
+                      {set.words.length} كلمة
+                    </div>
+                  </div>
+                </div>
+                <p className="clay-body-sm mb-3" style={{ color: 'var(--clay-body)' }}>
+                  {set.description}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {set.words.slice(0, 5).map((tifinagh) => (
+                    <span
+                      key={tifinagh}
+                      className="tifinagh-text text-sm px-2 py-0.5 rounded-full"
+                      style={{ background: 'var(--clay-surface-soft)', color: 'var(--clay-ink)' }}
+                    >
+                      {tifinagh}
+                    </span>
+                  ))}
+                </div>
+              </button>
+            )
+          })}
+
+          <button
+            onClick={() => startRound()}
+            className="clay-card kid-card-hover p-5 text-start"
+            style={{
+              borderRadius: '24px',
+              border: activeSetId === null ? '3px solid var(--clay-lavender)' : '3px solid #ffffff',
+              background: 'linear-gradient(160deg, #efe8ff 0%, #ffffff 78%)',
+            }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-4xl leading-none" aria-hidden>
+                🎲
+              </span>
+              <div className="min-w-0">
+                <div className="clay-title-sm" style={{ color: 'var(--clay-ink)' }}>
+                  كلمات عشوائية
+                </div>
+                <div className="clay-caption" style={{ color: 'var(--clay-muted)' }}>
+                  من كل مفردات التطبيق
+                </div>
+              </div>
+            </div>
+            <p className="clay-body-sm" style={{ color: 'var(--clay-body)' }}>
+              اختر هذا الخيار إذا أردت أن تكون الكلمات متنوعة كل مرة.
+            </p>
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (!puzzle) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -203,7 +301,7 @@ export default function AmudruMatchView() {
   }
 
   return (
-    <div className="min-h-screen w-full pb-12">
+    <div className="w-full">
       {/* ───────── Progress bar ───────── */}
       <div className="max-w-3xl mx-auto mb-6 px-2">
         <div className="flex items-center justify-between mb-2">
@@ -261,32 +359,35 @@ export default function AmudruMatchView() {
       {/* ───────── Title ───────── */}
       <div className="text-center mb-4">
         <h2 className="clay-title-lg mb-1" style={{ color: 'var(--clay-ink)' }}>
-          مباراة الحيوانات
+          مباراة الكلمات
         </h2>
         <p className="clay-body-md" style={{ color: 'var(--clay-muted)' }}>
-          🐾 قم ببناء كلمة ⵜⵉⴼⵉⵏⴰⵖ للحيوان!
+          🧩 ابنِ الكلمة الأمازيغية الصحيحة من الحروف!
         </p>
       </div>
 
-      {/* ───────── Animal card ───────── */}
+      {/* ───────── Word card ───────── */}
       <div className="flex justify-center mb-6">
         <div
-          id="animal-card"
-          className="clay-card w-64 md:w-72 flex flex-col items-center justify-center overflow-hidden transition-all duration-600 py-5 px-4"
+          id="word-card"
+          className="w-64 md:w-72 flex flex-col items-center justify-center overflow-hidden transition-all duration-600 py-6 px-4"
           style={{
-            borderRadius: '24px',
+            background: 'linear-gradient(170deg, #fff3cf 0%, #ffffff 78%)',
+            borderRadius: '30px',
+            border: showReveal ? '3px solid var(--clay-success)' : '3px solid #ffffff',
+            boxShadow: showReveal
+              ? '0 0 0 7px rgba(34, 197, 94, 0.1), 0 14px 30px rgba(61, 44, 20, 0.1)'
+              : '0 14px 30px rgba(61, 44, 20, 0.1)',
             animation: shakeCard ? 'shake 0.4s ease' : showReveal ? 'float 3s ease-in-out infinite' : undefined,
-            border: showReveal ? '2px solid var(--clay-success)' : undefined,
           }}
         >
-          <img
-            src={animalImageSrc}
-            alt={puzzle.animalName}
-            className="h-28 md:h-36 object-contain transition-all duration-500 mb-3"
-            style={showReveal ? { filter: 'drop-shadow(0 0 10px rgba(34,197,94,0.2))' } : {}}
+          <WordImage
+            emoji={puzzle.emoji}
+            size={132}
+            className="mb-3 animate-kid-bob transition-all duration-500"
           />
           <p className="clay-title-md" style={{ color: 'var(--clay-ink)' }}>
-            {puzzle.animalName}
+            {puzzle.wordArabic}
           </p>
           {!showReveal && (
             <p className="clay-body-sm mt-1" style={{ color: 'var(--clay-ochre)' }}>
@@ -308,19 +409,19 @@ export default function AmudruMatchView() {
               <span className="animate-pulse">|</span>
             </p>
             <p className="clay-body-lg" style={{ color: 'var(--clay-muted)' }}>
-              {puzzle.fullWordLatin}
+              {puzzle.wordLatin}
             </p>
             <button
               className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors"
               style={{ background: 'var(--clay-surface-soft)', color: 'var(--clay-lavender)' }}
               onClick={() => {
-                const utterance = new SpeechSynthesisUtterance(puzzle.animalName)
+                const utterance = new SpeechSynthesisUtterance(puzzle.wordArabic)
                 utterance.lang = 'ar-SA'
                 speechSynthesis.speak(utterance)
               }}
             >
               <Volume2 className="w-4 h-4" />
-              استمع ({puzzle.pronunciation})
+              استمع ({puzzle.wordLatin})
             </button>
           </div>
         </div>
@@ -384,17 +485,19 @@ export default function AmudruMatchView() {
                 onClick={() => handleSlotClick(idx)}
                 className="relative flex items-center justify-center transition-all duration-200 focus:outline-none"
                 style={{
-                  width: 'clamp(36px, 9vw, 52px)',
-                  height: 'clamp(44px, 11vw, 60px)',
-                  borderRadius: '14px',
+                  width: 'clamp(38px, 9vw, 54px)',
+                  height: 'clamp(46px, 11vw, 62px)',
+                  borderRadius: '18px',
                   border: isActive
-                    ? '2.5px solid var(--clay-peach)'
+                    ? '3px solid var(--clay-peach)'
                     : isFilled
-                      ? '2px solid var(--clay-lavender)'
-                      : '2px dashed var(--clay-hairline)',
-                  background: isFilled ? 'var(--clay-surface-soft)' : 'var(--clay-canvas)',
-                  boxShadow: isActive ? '0 0 0 3px rgba(232, 185, 74, 0.2)' : 'none',
-                  transform: isActive ? 'scale(1.08)' : 'scale(1)',
+                      ? '3px solid var(--clay-lavender)'
+                      : '3px dashed #ded7c8',
+                  background: isFilled ? '#f3edff' : '#ffffff',
+                  boxShadow: isActive
+                    ? '0 0 0 5px rgba(255, 176, 132, 0.18), 0 8px 16px rgba(61, 44, 20, 0.1)'
+                    : '0 5px 12px rgba(61, 44, 20, 0.06)',
+                  transform: isActive ? 'scale(1.07)' : 'scale(1)',
                   cursor: state.lastAnswerCorrect !== null ? 'default' : 'pointer',
                 }}
               >
@@ -438,7 +541,7 @@ export default function AmudruMatchView() {
       {!showReveal && (
         <div className="max-w-lg mx-auto px-2 mb-6">
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            {letterPool.map((letter) => {
+            {letterPool.map((letter, idx) => {
               const exhausted = isLetterExhausted(letter)
 
               return (
@@ -446,23 +549,22 @@ export default function AmudruMatchView() {
                   key={letter}
                   onClick={() => handleLetterTap(letter)}
                   disabled={exhausted || state.lastAnswerCorrect !== null}
-                  className="tifinagh-text flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-90"
+                  className="tifinagh-text flex items-center justify-center transition-all duration-150 hover:-translate-y-1 hover:rotate-2 active:scale-90"
                   style={{
-                    width: 'clamp(42px, 10vw, 54px)',
-                    height: 'clamp(46px, 11vw, 58px)',
-                    borderRadius: '14px',
-                    border: exhausted
-                      ? '1px solid var(--clay-hairline)'
-                      : '2px solid var(--clay-lavender)',
+                    width: 'clamp(44px, 10vw, 56px)',
+                    height: 'clamp(48px, 11vw, 60px)',
+                    borderRadius: '18px',
+                    border: exhausted ? '2px solid transparent' : '3px solid #ffffff',
                     background: exhausted
                       ? 'var(--clay-surface-strong)'
-                      : 'var(--clay-surface-soft)',
+                      : keyTints[idx % keyTints.length],
                     color: exhausted
                       ? 'var(--clay-muted-soft)'
                       : 'var(--clay-ink)',
                     opacity: exhausted ? 0.3 : 1,
+                    boxShadow: exhausted ? 'none' : '0 6px 14px rgba(61, 44, 20, 0.09)',
                     cursor: exhausted || state.lastAnswerCorrect !== null ? 'default' : 'pointer',
-                    fontSize: 'clamp(16px, 4vw, 22px)',
+                    fontSize: 'clamp(16px, 4vw, 24px)',
                     fontWeight: 700,
                   }}
                   title={letter}

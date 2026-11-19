@@ -80,10 +80,10 @@ export default function ColorsGameView() {
   }
 
   return (
-    <div className="min-h-screen w-full pb-12">
+    <div className="w-full">
       <div className="max-w-5xl mx-auto">
         {/* Progress bar */}
-        <div className="mb-8">
+        <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
             <span className="clay-caption" style={{ color: 'var(--clay-muted-soft)' }}>
               🎨 {currentIndex + 1} / {totalPuzzles}
@@ -138,18 +138,16 @@ export default function ColorsGameView() {
 
         {/* Title */}
         <div
-          className={`text-center mb-8 transition-all duration-600 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+          className={`text-center mb-5 transition-all duration-600 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
         >
           <h2 className="clay-title-lg mb-1" style={{ color: 'var(--clay-ink)' }}>
             ⴰⵎⵓⵔⴰⵔ ⵏ ⵉⴽⵯⵍⴰⵏ — ألوان
           </h2>
-          <p className="clay-body-md" style={{ color: 'var(--clay-muted)' }}>
-            🎨 تعلم أسماء الألوان باللغة الأمازيغية
-          </p>
+          
         </div>
 
         {/* Main game area: Object (left) + Palette (right) */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-8">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-5">
           {/* Left: Object display */}
           <div
             id="color-object-card"
@@ -228,28 +226,15 @@ export default function ColorsGameView() {
 
         {/* Question prompt banner */}
         <div
-          className={`text-center mb-8 transition-all duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}
+          className={`text-center mb-5 transition-all duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}
           style={{ transitionDelay: '200ms' }}
         >
-          <div
-            className="inline-block px-8 py-5 rounded-2xl max-w-2xl mx-auto"
-            style={{
-              background: 'var(--clay-surface-soft)',
-              border: `1px solid var(--clay-hairline)`,
-            }}
-          >
-            <p className="tifinagh-text text-2xl md:text-3xl font-bold mb-2" style={{ color: 'var(--clay-ink)' }}>
-              ⵎⴰⵏ ⵉⴽⵯⵍⴰⵏ ⴰⵢ ⴰⴷ؟
-            </p>
-            <p className="clay-body-lg mb-1" style={{ color: 'var(--clay-muted)' }}>
-              Man ikʷlan ay ad? — ما هو هذا اللون؟
-            </p>
-          </div>
+         
         </div>
 
         {/* Revealed answer */}
         {revealed && (
-          <div className="text-center mb-8 animate-pop-in">
+          <div className="text-center mb-5 animate-pop-in">
             <div
               className="inline-flex flex-col items-center gap-3 px-8 py-6 rounded-2xl"
               style={{
