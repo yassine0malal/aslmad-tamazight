@@ -79,14 +79,3 @@ export const letterPuzzles: LetterPuzzle[] = buildLetterPuzzles()
 export const wordPuzzles: WordPuzzle[] = buildWordPuzzles()
 export const memoryPairs = buildMemoryPairs()
 
-export const tifinaghToLatin: Record<string, string> = {
-  'ⴰ': 'ya', 'ⴱ': 'yab', 'ⴳ': 'yag', 'ⴷ': 'yad',
-  'ⴹ': 'yaḍ', 'ⴻ': 'yey', 'ⴼ': 'yaf', 'ⴽ': 'yak',
-  'ⵀ': 'yah', 'ⵃ': 'yaḥ', 'ⵄ': 'yae', 'ⵅ': 'yax',
-  'ⵇ': 'yaq', 'ⵉ': 'yi', 'ⵊ': 'yaj', 'ⵍ': 'yal',
-  'ⵎ': 'yam', 'ⵏ': 'yan',
-  'ⵓ': 'yu', 'ⵔ': 'yar', 'ⵕ': 'yaṛ', 'ⵖ': 'yaɣ',
-  'ⵙ': 'yas', 'ⵚ': 'yaṣ', 'ⵛ': 'yaš', 'ⵜ': 'yat',
-  'ⵟ': 'yaṭ', 'ⵡ': 'yaw', 'ⵢ': 'yay', 'ⵣ': 'yaz',
-  'ⵥ': 'yaẓ',
-}

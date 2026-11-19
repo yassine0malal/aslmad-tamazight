@@ -3,65 +3,93 @@ import { useGame } from '@/context/GameContext'
 import WordImage from '@/components/WordImage'
 import { ArrowRight, Check, Clock, X } from 'lucide-react'
 import { choiceLabels } from '@/data/constants'
+import type { RiddleChallenge } from '@/types/game'
+
+const ROUND_SECONDS = 20
+const POINTS_CORRECT = 20
+const ADVANCE_DELAY_MS = 1100
+const TIMEOUT_ADVANCE_DELAY_MS = 1600
 
 const optionTints = ['#fff7d6', '#e7f8ef', '#eee7ff', '#ffede4']
 
 export default function AmsasaRiddleView() {
+  const { state } = useGame()
+  const challenge = state.game4Deck[state.currentPuzzleIndex]
+
+  if (!challenge) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <p className="clay-body-lg" style={{ color: 'var(--clay-ink)' }}>
+          جارٍ تحضير اللعبة...
+        </p>
+      </div>
+    )
+  }
+
+  // A new question remounts the round, so its answers and clock start fresh.
+  return (
+    <RiddleRound
+      key={`${state.currentPuzzleIndex}-${challenge.id}`}
+      challenge={challenge}
+    />
+  )
+}
+
+function RiddleRound({ challenge }: { challenge: RiddleChallenge }) {
   const { state, dispatch } = useGame()
 
+  const activeTeam = state.teams[state.activeTeamIndex]
+  const totalRounds = state.game4Deck.length
+  const roundNumber = Math.min(state.currentPuzzleIndex + 1, totalRounds)
+  const correctOption = challenge.options.find(
+    (option) => option.id === challenge.correctAnswerId,
+  )
+
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
-  const [disabledOptionIds, setDisabledOptionIds] = useState<string[]>([])
-  const [timerSeconds, setTimerSeconds] = useState(20)
+  const [timerSeconds, setTimerSeconds] = useState(ROUND_SECONDS)
   const [timerActive, setTimerActive] = useState(false)
   const [timerExpired, setTimerExpired] = useState(false)
   const [inputLocked, setInputLocked] = useState(false)
   const [announceMessage, setAnnounceMessage] = useState<string | null>(null)
-  const passTimeoutRef = useRef<number | null>(null)
-  const secondsRef = useRef(20)
 
-  const challenge = state.game4Deck[state.currentPuzzleIndex]
-  const activeTeam = state.teams[state.activeTeamIndex]
-  const totalRounds = state.game4Deck.length
-  const roundNumber = Math.min(state.currentPuzzleIndex + 1, totalRounds)
-  const correctOption = challenge?.options.find(
-    (option) => option.id === challenge.correctAnswerId,
-  )
+  const secondsRef = useRef(ROUND_SECONDS)
+  const advanceTimeoutRef = useRef<number | null>(null)
 
   const progressPct = useMemo(() => {
     if (totalRounds === 0) return 0
     return Math.round((state.currentPuzzleIndex / totalRounds) * 100)
   }, [state.currentPuzzleIndex, totalRounds])
 
-  useEffect(() => {
-    setSelectedOptionId(null)
-    setDisabledOptionIds([])
-    secondsRef.current = 20
-    setTimerSeconds(20)
-    setTimerActive(false)
-    setTimerExpired(false)
-    setInputLocked(false)
-    setAnnounceMessage(null)
-    if (passTimeoutRef.current !== null) {
-      window.clearTimeout(passTimeoutRef.current)
-      passTimeoutRef.current = null
-    }
-  }, [state.currentPuzzleIndex, challenge?.id])
+  /** Hand the turn to the next team and load a new question. */
+  const handOverTurn = useCallback(
+    (delay: number) => {
+      advanceTimeoutRef.current = window.setTimeout(() => {
+        dispatch({ type: 'SWITCH_TEAM' })
+        dispatch({ type: 'NEXT_PUZZLE' })
+        advanceTimeoutRef.current = null
+      }, delay)
+    },
+    [dispatch],
+  )
 
-  /** Time is up and the team did not answer: stop them, hand the turn over and
-   * move on to the next item. */
+  useEffect(() => {
+    return () => {
+      if (advanceTimeoutRef.current !== null) {
+        window.clearTimeout(advanceTimeoutRef.current)
+        advanceTimeoutRef.current = null
+      }
+    }
+  }, [])
+
   const finishRoundByTimeout = useCallback(() => {
     setTimerExpired(true)
     setTimerActive(false)
     setInputLocked(true)
     setSelectedOptionId(null)
     dispatch({ type: 'ANSWER_INCORRECT' })
-    setAnnounceMessage('انتهى الوقت! +0 نقطة. الانتقال إلى السؤال التالي مع الفريق الآخر.')
-    passTimeoutRef.current = window.setTimeout(() => {
-      dispatch({ type: 'SWITCH_TEAM' })
-      dispatch({ type: 'NEXT_PUZZLE' })
-      passTimeoutRef.current = null
-    }, 1600)
-  }, [dispatch])
+    setAnnounceMessage('انتهى الوقت! +0 نقطة. سؤال جديد للفريق الآخر.')
+    handOverTurn(TIMEOUT_ADVANCE_DELAY_MS)
+  }, [dispatch, handOverTurn])
 
   useEffect(() => {
     if (!timerActive) return
@@ -75,76 +103,44 @@ export default function AmsasaRiddleView() {
       }
     }, 1000)
 
-    return () => clearInterval(interval)
+    return () => window.clearInterval(interval)
   }, [timerActive, finishRoundByTimeout])
 
-  useEffect(() => {
-    return () => {
-      if (passTimeoutRef.current !== null) {
-        window.clearTimeout(passTimeoutRef.current)
-        passTimeoutRef.current = null
-      }
-    }
-  }, [])
+  const startTimer = () => {
+    if (timerActive) return
+    secondsRef.current = ROUND_SECONDS
+    setTimerSeconds(ROUND_SECONDS)
+    setTimerExpired(false)
+    setTimerActive(true)
+  }
 
-  const handleOptionClick = useCallback(
-    (optionId: string) => {
-      if (inputLocked || state.lastAnswerCorrect !== null) return
-      if (disabledOptionIds.includes(optionId)) return
-      setSelectedOptionId(optionId)
-    },
-    [disabledOptionIds, inputLocked, state.lastAnswerCorrect],
-  )
+  const handleOptionClick = (optionId: string) => {
+    if (inputLocked || state.lastAnswerCorrect !== null) return
+    setSelectedOptionId(optionId)
+  }
 
-  const handleSubmit = useCallback(() => {
-    if (!challenge || !selectedOptionId || inputLocked || state.lastAnswerCorrect !== null)
-      return
+  const handleSubmit = () => {
+    if (!selectedOptionId || inputLocked || state.lastAnswerCorrect !== null) return
 
     // The team answered in time — stop the clock so it cannot fire afterwards.
     setTimerActive(false)
+    setInputLocked(true)
 
-    const isCorrect = selectedOptionId === challenge.correctAnswerId
-    if (isCorrect) {
-      setInputLocked(true)
-      const points = Math.max(20 - disabledOptionIds.length * 5, 0)
-      dispatch({ type: 'ANSWER_CORRECT', payload: { points } })
-      window.setTimeout(() => {
-        dispatch({ type: 'SWITCH_TEAM' })
-        dispatch({ type: 'NEXT_PUZZLE' })
-      }, 1100)
+    if (selectedOptionId === challenge.correctAnswerId) {
+      dispatch({ type: 'ANSWER_CORRECT', payload: { points: POINTS_CORRECT } })
+      handOverTurn(ADVANCE_DELAY_MS)
       return
     }
 
     // A wrong choice hands the turn to the next team together with a *new*
     // question — the next team never gets the question the last team failed.
-    setInputLocked(true)
     dispatch({ type: 'ANSWER_INCORRECT' })
     setAnnounceMessage('إجابة غير صحيحة +0 نقطة. سؤال جديد للفريق الآخر.')
-    window.setTimeout(() => {
-      dispatch({ type: 'SWITCH_TEAM' })
-      dispatch({ type: 'NEXT_PUZZLE' })
-    }, 1100)
-  }, [
-    challenge,
-    dispatch,
-    disabledOptionIds.length,
-    inputLocked,
-    selectedOptionId,
-    state.lastAnswerCorrect,
-  ])
-
-  if (!challenge) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <p className="clay-body-lg" style={{ color: 'var(--clay-ink)' }}>
-          جارٍ تحضير اللعبة...
-        </p>
-      </div>
-    )
+    handOverTurn(ADVANCE_DELAY_MS)
   }
 
-  const isCorrectAnswerRevealed = state.lastAnswerCorrect === true
-  const timerPct = (timerSeconds / 20) * 100
+  const isAnswerRevealed = state.lastAnswerCorrect === true
+  const timerPct = (timerSeconds / ROUND_SECONDS) * 100
   const timerColor =
     timerSeconds <= 5
       ? 'var(--clay-error)'
@@ -183,8 +179,9 @@ export default function AmsasaRiddleView() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
           <div>
             <h2 className="text-3xl sm:text-4xl font-bold mb-1" style={{ color: 'var(--clay-ink)' }}>
-              🎭 أمساسا ن توالفت
-            </h2>              <p className="clay-body-md" style={{ color: 'var(--clay-muted)' }}>
+              🎭 ⵜⵓⵙⵙⵏⴰ ⵏ ⵜⵡⵍⴰⴼⵜ
+            </h2>
+            <p className="clay-body-md" style={{ color: 'var(--clay-muted)' }}>
               خمّن الكلمة الأمازيغية من معناها ورمزها. اختر الجواب الصحيح من بين 4 خيارات.
             </p>
           </div>
@@ -204,9 +201,7 @@ export default function AmsasaRiddleView() {
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
           {/* Clue + Timer */}
           <div>
-            <div
-              className="clay-card overflow-hidden"
-            >
+            <div className="clay-card overflow-hidden">
               {/* Header */}
               <div
                 className="px-6 py-4 flex items-center justify-between"
@@ -225,14 +220,7 @@ export default function AmsasaRiddleView() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (!timerActive) {
-                      secondsRef.current = 20
-                      setTimerSeconds(20)
-                      setTimerExpired(false)
-                      setTimerActive(true)
-                    }
-                  }}
+                  onClick={startTimer}
                   className="rounded-full px-4 py-2 text-sm font-semibold transition-all"
                   style={{
                     background: timerActive ? 'var(--clay-surface-soft)' : 'var(--clay-success)',
@@ -321,35 +309,28 @@ export default function AmsasaRiddleView() {
           {/* Options */}
           <div className="space-y-3">
             {challenge.options.map((option, idx) => {
-              const isDisabled = disabledOptionIds.includes(option.id)
               const isSelected = selectedOptionId === option.id
-              const isCorrect = option.id === challenge.correctAnswerId
-              const showCorrect = isCorrectAnswerRevealed && isCorrect
+              const showCorrect = isAnswerRevealed && option.id === challenge.correctAnswerId
 
               return (
                 <button
                   key={option.id}
                   type="button"
                   onClick={() => handleOptionClick(option.id)}
-                  disabled={isDisabled || inputLocked || state.lastAnswerCorrect === true}
+                  disabled={inputLocked || isAnswerRevealed}
                   className="kid-choice w-full p-4 text-right flex items-center justify-between gap-4"
                   style={{
                     border: showCorrect
                       ? '3px solid var(--clay-success)'
-                      : isDisabled
-                        ? '3px solid var(--clay-error)'
-                        : isSelected
-                          ? '3px solid var(--clay-lavender)'
-                          : '3px solid #ffffff',
+                      : isSelected
+                        ? '3px solid var(--clay-lavender)'
+                        : '3px solid #ffffff',
                     background: showCorrect
                       ? '#eafbf1'
-                      : isDisabled
-                        ? '#fff1f1'
-                        : isSelected
-                          ? '#ffffff'
-                          : optionTints[idx % optionTints.length],
+                      : isSelected
+                        ? '#ffffff'
+                        : optionTints[idx % optionTints.length],
                     color: 'var(--clay-ink)',
-                    opacity: isDisabled && !showCorrect ? 0.65 : 1,
                     transform: isSelected && !showCorrect ? 'translateY(-3px)' : undefined,
                     boxShadow: isSelected
                       ? '0 12px 24px rgba(124, 92, 214, 0.16)'
@@ -368,7 +349,9 @@ export default function AmsasaRiddleView() {
                       {choiceLabels[idx]}
                     </span>
                     <div className="text-left">
-                      <p className="tifinagh-text text-3xl md:text-4xl font-bold">{option.tifinaghText}</p>
+                      <p className="tifinagh-text text-3xl md:text-4xl font-bold">
+                        {option.tifinaghText}
+                      </p>
                       <p className="clay-body-sm" style={{ color: 'var(--clay-muted)' }}>
                         {option.phoneticText}
                       </p>
@@ -380,14 +363,6 @@ export default function AmsasaRiddleView() {
                       style={{ borderRadius: '9999px', background: 'var(--clay-success)' }}
                     >
                       <Check className="w-5 h-5 text-white" />
-                    </div>
-                  )}
-                  {isDisabled && !showCorrect && (
-                    <div
-                      className="w-8 h-8 flex items-center justify-center shrink-0"
-                      style={{ borderRadius: '9999px', background: 'var(--clay-error)' }}
-                    >
-                      <X className="w-5 h-5 text-white" />
                     </div>
                   )}
                 </button>
@@ -407,36 +382,26 @@ export default function AmsasaRiddleView() {
                 </div>
                 <div className="text-right">
                   <p className="clay-caption" style={{ color: 'var(--clay-muted)' }}>
-                    النقاط المحتملة
+                    النقاط
                   </p>
-                  <p
-                    className="text-xl font-bold mt-1"
-                    style={{ color: 'var(--clay-success)' }}
-                  >
-                    {Math.max(20 - disabledOptionIds.length * 5, 0)}
+                  <p className="text-xl font-bold mt-1" style={{ color: 'var(--clay-success)' }}>
+                    {POINTS_CORRECT}
                   </p>
                 </div>
               </div>
-              {disabledOptionIds.length > 0 && (
-                <div className="mt-2 pt-2" style={{ borderTop: '1px solid var(--clay-hairline)' }}>
-                  <p className="clay-body-sm" style={{ color: 'var(--clay-muted-soft)' }}>
-                    خيارات مغلقة: {disabledOptionIds.length} / 4
-                  </p>
-                </div>
-              )}
 
               {/* Check answer — sits under the current-turn panel */}
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={!selectedOptionId || inputLocked || state.lastAnswerCorrect === true}
+                disabled={!selectedOptionId || inputLocked || isAnswerRevealed}
                 className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 font-bold text-white transition-all ${
-                  selectedOptionId && !inputLocked && state.lastAnswerCorrect !== true
+                  selectedOptionId && !inputLocked && !isAnswerRevealed
                     ? 'clay-btn-primary'
                     : 'clay-btn-primary opacity-40 cursor-not-allowed'
                 }`}
               >
-                {state.lastAnswerCorrect === false ? 'صحح الاختيار' : 'تحقق'}
+                تحقق
                 <ArrowRight className="w-5 h-5" />
               </button>
             </div>
@@ -460,7 +425,7 @@ export default function AmsasaRiddleView() {
                 <Check className="w-6 h-6 text-white" />
               </div>
               <span className="clay-title-sm" style={{ color: 'var(--clay-success)' }}>
-              🎉 أحسنت! إجابة صحيحة! سيتم الانتقال للسؤال التالي.
+                🎉 أحسنت! إجابة صحيحة! سيتم الانتقال للسؤال التالي.
               </span>
             </div>
           </div>

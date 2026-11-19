@@ -12,6 +12,8 @@ import { getWordSet } from '@/data/wordSets'
 import { shuffleArray } from '@/lib/utils'
 
 const GROUP_QUESTION_COUNT = 3
+/** «أمساسا ن توالفت» stops after this many questions and returns to the hub. */
+const RIDDLE_QUESTION_LIMIT = 18
 
 function buildMemoryDeck(pairCount: number) {
   const selectedPairs = shuffleArray(memoryPairs).slice(0, pairCount)
@@ -282,8 +284,7 @@ function gameReducer(state: AppState, action: GameAction): AppState {
       let nextHalf = state.matchHalf
       let completed = false
 
-      // Exit game when reaching puzzle 18 (first situation of school)
-      if (state.view === 'game4' && nextOverall >= 18) {
+      if (state.view === 'game4' && nextOverall >= RIDDLE_QUESTION_LIMIT) {
         return {
           ...state,
           view: 'game-hub',
